@@ -1,0 +1,1388 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Korean Dictionary Smart Search</title>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --panel: #171a21;
+      --panel2: #1f2430;
+      --text: #f3f5f7;
+      --muted: #9aa4b2;
+      --border: #303747;
+      --accent: #79b8ff;
+      --accent2: #b392f0;
+      --danger: #ff7b72;
+      --ok: #7ee787;
+      --warn: #f2cc60;
+      --shadow: rgba(0, 0, 0, 0.35);
+      --mark: #ffe58f;
+      --markText: #111;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at top left, rgba(121,184,255,.16), transparent 32rem),
+        radial-gradient(circle at top right, rgba(179,146,240,.12), transparent 28rem),
+        var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: 28px;
+      letter-spacing: -0.03em;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      margin: 0 0 20px;
+      line-height: 1.45;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: rgba(23, 26, 33, 0.92);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 12px 30px var(--shadow);
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 15px 16px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(31, 36, 48, 0.7);
+      font-weight: 650;
+    }
+
+    .card-body { padding: 16px; }
+
+    .drop {
+      border: 1.5px dashed #526078;
+      border-radius: 14px;
+      padding: 18px;
+      text-align: center;
+      background: rgba(121,184,255,.05);
+      transition: .15s ease;
+    }
+
+    .drop.drag {
+      border-color: var(--accent);
+      background: rgba(121,184,255,.12);
+      transform: translateY(-1px);
+    }
+
+    input[type="file"] {
+      display: block;
+      margin: 12px auto 0;
+      max-width: 100%;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+      margin-top: 10px;
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .searchbar {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    @media (max-width: 700px) {
+      .searchbar { grid-template-columns: 1fr; }
+    }
+
+    input[type="search"], input[type="text"], input[type="number"], select {
+      width: 100%;
+      padding: 12px 13px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #0d1117;
+      color: var(--text);
+      outline: none;
+      font-size: 15px;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(121,184,255,.12);
+    }
+
+    button {
+      padding: 11px 14px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #232a36;
+      color: var(--text);
+      cursor: pointer;
+      font-weight: 650;
+      transition: .12s ease;
+      white-space: nowrap;
+    }
+
+    button:hover:not(:disabled) {
+      background: #2b3444;
+      border-color: #536078;
+    }
+
+    button.primary {
+      background: linear-gradient(135deg, #2f81f7, #8957e5);
+      border-color: transparent;
+    }
+
+    button.primary:hover:not(:disabled) {
+      filter: brightness(1.08);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: .55;
+    }
+
+    .pill {
+      display: inline-flex;
+      gap: 6px;
+      align-items: center;
+      padding: 5px 9px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: rgba(255,255,255,.035);
+      color: var(--muted);
+      font-size: 12px;
+      margin: 3px 4px 3px 0;
+    }
+
+    .pill.ok { color: var(--ok); border-color: rgba(126,231,135,.35); }
+    .pill.warn { color: var(--warn); border-color: rgba(242,204,96,.35); }
+    .pill.bad { color: var(--danger); border-color: rgba(255,123,114,.35); }
+
+    .db-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .db-item {
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.03);
+      border-radius: 12px;
+      padding: 10px;
+    }
+
+    .db-name {
+      font-weight: 650;
+      overflow-wrap: anywhere;
+    }
+
+    .db-meta {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 4px;
+      line-height: 1.35;
+    }
+
+    .section-title {
+      font-size: 13px;
+      color: var(--muted);
+      margin: 16px 0 8px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    .options {
+      display: grid;
+      grid-template-columns: 1fr 110px;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .check {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+      margin-top: 10px;
+    }
+
+    .check input { margin-top: 2px; }
+
+    .status {
+      min-height: 24px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+      margin-top: 10px;
+      overflow-wrap: anywhere;
+    }
+
+    progress {
+      width: 100%;
+      height: 10px;
+      accent-color: #2f81f7;
+      margin-top: 10px;
+    }
+
+    .results-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .results-info {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    #results {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .result {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      background: rgba(255,255,255,.035);
+    }
+
+    .result-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    .result-source {
+      color: var(--muted);
+      font-size: 12px;
+      overflow-wrap: anywhere;
+    }
+
+    .result-num {
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .fields {
+      display: grid;
+      gap: 7px;
+    }
+
+    .field {
+      display: grid;
+      grid-template-columns: minmax(95px, 160px) 1fr;
+      gap: 10px;
+      border-top: 1px solid rgba(255,255,255,.055);
+      padding-top: 7px;
+      line-height: 1.45;
+    }
+
+    .field:first-child {
+      border-top: none;
+      padding-top: 0;
+    }
+
+    .key {
+      color: var(--muted);
+      font-size: 12px;
+      overflow-wrap: anywhere;
+    }
+
+    .value {
+      overflow-wrap: anywhere;
+      white-space: pre-wrap;
+    }
+
+    mark {
+      background: var(--mark);
+      color: var(--markText);
+      padding: 0 2px;
+      border-radius: 3px;
+    }
+
+    .chips {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .chip {
+      display: inline-flex;
+      gap: 6px;
+      align-items: center;
+      padding: 7px 10px;
+      border: 1px solid rgba(121,184,255,.35);
+      background: rgba(121,184,255,.08);
+      border-radius: 999px;
+      cursor: pointer;
+      user-select: none;
+      font-size: 14px;
+    }
+
+    .chip:hover {
+      background: rgba(121,184,255,.14);
+    }
+
+    .score {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-top: 12px;
+    }
+
+    .empty {
+      padding: 30px;
+      color: var(--muted);
+      text-align: center;
+      border: 1px dashed var(--border);
+      border-radius: 14px;
+      background: rgba(255,255,255,.025);
+    }
+
+    details {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,.025);
+      margin-top: 12px;
+    }
+
+    summary {
+      cursor: pointer;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    code {
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 6px;
+      padding: 1px 5px;
+    }
+
+    .small { font-size: 12px; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Корейский словарь: быстрый поиск + похожие слова</h1>
+    <p class="subtitle">
+      Загружай несколько SQLite-файлов словаря <code>.db</code>. Отдельно можно загрузить
+      <code>nk200sg7_vectors.db</code>, чтобы искать семантически близкие корейские слова.
+      Готово для GitHub Pages: один статический <code>index.html</code>, без сервера.
+      Ничего не отправляется на сервер: файлы обрабатываются и сохраняются в браузере.
+    </p>
+
+    <div class="grid">
+      <aside class="card">
+        <div class="card-header">1. Файлы</div>
+        <div class="card-body">
+          <div id="drop" class="drop">
+            Перетащи сюда <code>.db</code> файлы
+            <input id="fileInput" type="file" multiple accept=".db,.sqlite,.sqlite3,.bin" />
+            <div class="hint">
+              Можно выбрать сразу несколько словарей. Если файл <code>.bin</code> на самом деле SQLite,
+              он тоже загрузится. Word2vec-текст <code>.vec</code> сюда не нужен: лучше используй
+              <code>nk200sg7_vectors.db</code>.
+            </div>
+          </div>
+
+          <div id="loadStatus" class="status">SQL.js ещё не загружен.</div>
+          <progress id="progress" value="0" max="100" hidden></progress>
+
+          <div class="section-title">Память устройства</div>
+          <label class="check">
+            <input id="saveUploads" type="checkbox" checked />
+            <span>
+              Сохранять загруженные базы в памяти браузера и автоматически восстанавливать их при следующем открытии.
+              Для больших <code>.db</code> используется IndexedDB, потому что обычный localStorage слишком маленький.
+            </span>
+          </label>
+          <div class="toolbar">
+            <button id="restoreBtn">Восстановить из памяти</button>
+            <button id="clearStoredBtn">Очистить сохранённые базы</button>
+          </div>
+          <div id="storageStatus" class="status">Проверяю память браузера...</div>
+
+          <div class="section-title">Загруженные базы</div>
+          <div id="dbList" class="db-list">
+            <div class="empty">Пока нет баз.</div>
+          </div>
+
+          <details>
+            <summary>Как это использовать</summary>
+            <div class="hint">
+              <p><b>Обычный словарь:</b> загрузи свои dictionary <code>.db</code> и ищи по корейскому, русскому или английскому тексту.</p>
+              <p><b>Умный режим:</b> дополнительно загрузи <code>nk200sg7_vectors.db</code>, нажми “Похожие слова” — приложение покажет корейские слова из похожего контекста.</p>
+              <p><b>Без зависаний:</b> результаты подгружаются порциями. Можно нажимать “Загрузить ещё”.</p>
+              <p><b>GitHub Pages:</b> загрузи этот файл как <code>index.html</code> в репозиторий и включи Pages. Базы не нужно коммитить: пользователь загружает их один раз, дальше они лежат в памяти его браузера.</p>
+              <p><b>Память:</b> технически базы сохраняются в IndexedDB. В localStorage хранится только маленькая настройка, включено ли автосохранение.</p>
+            </div>
+          </details>
+        </div>
+      </aside>
+
+      <main class="card">
+        <div class="card-header">2. Поиск</div>
+        <div class="card-body">
+          <div class="searchbar">
+            <input id="query" type="search" placeholder="Например: 수출, 음식, 계약, 학교..." autocomplete="off" />
+            <button id="searchBtn" class="primary">Искать</button>
+            <button id="similarBtn">Похожие слова</button>
+          </div>
+
+          <div class="options">
+            <select id="batchSize">
+              <option value="100">100 за раз</option>
+              <option value="300" selected>300 за раз</option>
+              <option value="700">700 за раз</option>
+              <option value="1500">1500 за раз</option>
+            </select>
+            <input id="topN" type="number" min="3" max="50" value="15" title="Сколько похожих слов показать" />
+          </div>
+
+          <label class="check">
+            <input id="semanticExpand" type="checkbox" />
+            <span>
+              Расширять поиск похожими словами, если загружен <code>nk200sg7_vectors.db</code>.
+              Например, для <code>수출</code> искать ещё ближайшие слова. Это может быть медленнее.
+            </span>
+          </label>
+
+          <div id="searchStatus" class="status">Загрузи хотя бы одну словарную базу. Для похожих слов — ещё и vector DB.</div>
+
+          <div id="similarBox" class="chips"></div>
+
+          <div class="toolbar">
+            <button id="loadMoreBtn" disabled>Загрузить ещё</button>
+            <button id="clearBtn">Очистить</button>
+            <span id="counters" class="small"></span>
+          </div>
+
+          <div class="results-head">
+            <div class="results-info" id="resultInfo">Результатов пока нет.</div>
+          </div>
+
+          <div id="results">
+            <div class="empty">Сначала загрузи базу и введи запрос.</div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.js"></script>
+  <script>
+    const STORAGE_DB_NAME = "korean-dictionary-smart-search-files-v1";
+    const STORAGE_STORE = "files";
+    const SAVE_UPLOADS_KEY = "kdict.smartSearch.saveUploads";
+
+    const state = {
+      SQL: null,
+      dictDbs: [],
+      vectorDb: null,
+      vector: null,
+      storageDb: null,
+      search: null,
+      rendered: 0,
+      lastTerms: [],
+      saveUploads: true
+    };
+
+    const $ = (id) => document.getElementById(id);
+    const fileInput = $("fileInput");
+    const drop = $("drop");
+    const loadStatus = $("loadStatus");
+    const searchStatus = $("searchStatus");
+    const progress = $("progress");
+    const dbList = $("dbList");
+    const results = $("results");
+    const resultInfo = $("resultInfo");
+    const counters = $("counters");
+    const loadMoreBtn = $("loadMoreBtn");
+    const similarBox = $("similarBox");
+    const storageStatus = $("storageStatus");
+    const saveUploads = $("saveUploads");
+    const restoreBtn = $("restoreBtn");
+    const clearStoredBtn = $("clearStoredBtn");
+
+    function sleep(ms = 0) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function esc(s) {
+      return String(s ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function qi(name) {
+      return '"' + String(name).replaceAll('"', '""') + '"';
+    }
+
+    function escapeLike(s) {
+      return String(s).replace(/[\\%_]/g, m => "\\" + m);
+    }
+
+    function formatBytes(bytes) {
+      if (!Number.isFinite(bytes)) return "";
+      const units = ["B", "KB", "MB", "GB"];
+      let v = bytes, i = 0;
+      while (v >= 1024 && i < units.length - 1) { v /= 1024; i++; }
+      return `${v.toFixed(i ? 1 : 0)} ${units[i]}`;
+    }
+
+    function getSaveUploadsPreference() {
+      return localStorage.getItem(SAVE_UPLOADS_KEY) !== "0";
+    }
+
+    function setSaveUploadsPreference(enabled) {
+      state.saveUploads = !!enabled;
+      localStorage.setItem(SAVE_UPLOADS_KEY, enabled ? "1" : "0");
+    }
+
+    function makeStorageId(type, name, size, lastModified = 0) {
+      return `${type}:${name}:${size}:${lastModified || 0}`;
+    }
+
+    function alreadyLoaded(name, size, type = "dict") {
+      if (type === "vector") {
+        return !!state.vectorDb && state.vectorDb.name === name && state.vectorDb.size === size;
+      }
+      return state.dictDbs.some(d => d.name === name && d.size === size);
+    }
+
+    async function requestPersistentBrowserStorage() {
+      if (!navigator.storage?.persist) return false;
+      try {
+        return await navigator.storage.persist();
+      } catch (e) {
+        return false;
+      }
+    }
+
+    function openFileStorage() {
+      if (!window.indexedDB) {
+        storageStatus.innerHTML = `<span class="pill bad">IndexedDB недоступен</span> Автосохранение баз в этом браузере не сработает.`;
+        return Promise.reject(new Error("IndexedDB is not available"));
+      }
+
+      if (state.storageDb) return Promise.resolve(state.storageDb);
+
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open(STORAGE_DB_NAME, 1);
+
+        req.onupgradeneeded = () => {
+          const db = req.result;
+          if (!db.objectStoreNames.contains(STORAGE_STORE)) {
+            const store = db.createObjectStore(STORAGE_STORE, { keyPath: "id" });
+            store.createIndex("type", "type", { unique: false });
+            store.createIndex("name", "name", { unique: false });
+            store.createIndex("updatedAt", "updatedAt", { unique: false });
+          }
+        };
+
+        req.onsuccess = () => {
+          state.storageDb = req.result;
+          resolve(state.storageDb);
+        };
+
+        req.onerror = () => reject(req.error || new Error("Cannot open IndexedDB"));
+      });
+    }
+
+    function idbRequest(req) {
+      return new Promise((resolve, reject) => {
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error || new Error("IndexedDB request failed"));
+      });
+    }
+
+    function idbTxDone(tx) {
+      return new Promise((resolve, reject) => {
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error || new Error("IndexedDB transaction failed"));
+        tx.onabort = () => reject(tx.error || new Error("IndexedDB transaction aborted"));
+      });
+    }
+
+    async function listSavedFiles() {
+      const db = await openFileStorage();
+      const tx = db.transaction(STORAGE_STORE, "readonly");
+      const rows = await idbRequest(tx.objectStore(STORAGE_STORE).getAll());
+      await idbTxDone(tx);
+      return rows.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+    }
+
+    async function saveBufferToDevice({ type, name, size, lastModified, buffer }) {
+      if (!state.saveUploads) return;
+
+      try {
+        const db = await openFileStorage();
+        const tx = db.transaction(STORAGE_STORE, "readwrite");
+        const id = makeStorageId(type, name, size, lastModified);
+        tx.objectStore(STORAGE_STORE).put({
+          id,
+          type,
+          name,
+          size,
+          lastModified: lastModified || 0,
+          updatedAt: Date.now(),
+          buffer
+        });
+        await idbTxDone(tx);
+        await refreshStorageStatus(`${name} сохранён в памяти браузера.`);
+      } catch (err) {
+        console.error(err);
+        storageStatus.innerHTML = `<span class="pill bad">не сохранено</span> ${esc(name)}: браузер не дал записать файл. Возможно, не хватает квоты памяти.`;
+      }
+    }
+
+    async function clearSavedFiles() {
+      try {
+        const db = await openFileStorage();
+        const tx = db.transaction(STORAGE_STORE, "readwrite");
+        tx.objectStore(STORAGE_STORE).clear();
+        await idbTxDone(tx);
+        await refreshStorageStatus("Сохранённые копии баз удалены. Уже открытые сейчас базы останутся до перезагрузки страницы.");
+      } catch (err) {
+        console.error(err);
+        storageStatus.innerHTML = `<span class="pill bad">ошибка</span> Не удалось очистить сохранённые базы.`;
+      }
+    }
+
+    async function refreshStorageStatus(extra = "") {
+      try {
+        const saved = await listSavedFiles();
+        const total = saved.reduce((sum, x) => sum + (Number(x.size) || 0), 0);
+        let quotaText = "";
+        if (navigator.storage?.estimate) {
+          const est = await navigator.storage.estimate();
+          if (est.quota) {
+            quotaText = ` · занято браузером: ${formatBytes(est.usage || 0)} из ${formatBytes(est.quota)}`;
+          }
+        }
+        const persistent = navigator.storage?.persisted ? await navigator.storage.persisted().catch(() => false) : false;
+        storageStatus.innerHTML = `${extra ? esc(extra) + "<br>" : ""}<span class="pill ${saved.length ? "ok" : "warn"}">${saved.length ? "сохранено" : "пусто"}</span> ${saved.length} файлов, ${formatBytes(total)}${quotaText}${persistent ? " · хранение защищено от автоочистки" : ""}`;
+      } catch (err) {
+        console.error(err);
+        storageStatus.innerHTML = `<span class="pill bad">IndexedDB недоступен</span> Браузер не разрешил открыть локальную базу хранения.`;
+      }
+    }
+
+    async function restoreSavedFiles(options = {}) {
+      const silent = !!options.silent;
+      await initSql();
+
+      let saved = [];
+      try {
+        saved = await listSavedFiles();
+      } catch (err) {
+        console.error(err);
+        if (!silent) storageStatus.innerHTML = `<span class="pill bad">ошибка</span> Не удалось прочитать сохранённые базы.`;
+        return;
+      }
+
+      if (!saved.length) {
+        await refreshStorageStatus(silent ? "" : "В памяти браузера пока нет сохранённых баз.");
+        return;
+      }
+
+      progress.hidden = false;
+      progress.value = 0;
+      let restored = 0;
+      let skipped = 0;
+
+      for (let i = 0; i < saved.length; i++) {
+        const rec = saved[i];
+        if (alreadyLoaded(rec.name, rec.size, rec.type)) {
+          skipped++;
+          progress.value = Math.round(((i + 1) / saved.length) * 100);
+          continue;
+        }
+
+        loadStatus.textContent = `Восстанавливаю ${rec.name} из памяти браузера...`;
+        await sleep(0);
+        const result = await loadDbFromArrayBuffer({
+          name: rec.name,
+          size: rec.size,
+          buffer: rec.buffer,
+          fromStorage: true
+        });
+        if (result.ok) restored++;
+        progress.value = Math.round(((i + 1) / saved.length) * 100);
+        await sleep(0);
+      }
+
+      renderDbList();
+      updateReadyStatus();
+      await refreshStorageStatus(`Восстановлено: ${restored}. Уже было открыто: ${skipped}.`);
+      setTimeout(() => progress.hidden = true, 600);
+    }
+
+    function isKoreanLike(s) {
+      return /[가-힣ㄱ-ㅎㅏ-ㅣ]/.test(String(s));
+    }
+
+    function renderDbList() {
+      const items = [];
+
+      for (const d of state.dictDbs) {
+        const tableInfo = d.tables.map(t => `${t.name}: ${t.columns.length} колонок`).join("; ");
+        items.push(`
+          <div class="db-item">
+            <div class="db-name">${esc(d.name)}</div>
+            <div class="db-meta">
+              <span class="pill ok">словарь</span>
+              <span>${esc(formatBytes(d.size))}</span><br>
+              ${esc(d.tables.length)} таблиц: ${esc(tableInfo || "нет подходящих таблиц")}
+            </div>
+          </div>
+        `);
+      }
+
+      if (state.vectorDb) {
+        items.push(`
+          <div class="db-item">
+            <div class="db-name">${esc(state.vectorDb.name)}</div>
+            <div class="db-meta">
+              <span class="pill warn">word2vec</span>
+              <span>${esc(formatBytes(state.vectorDb.size))}</span><br>
+              ${state.vector?.ready ? esc(state.vector.count) + " слов, размерность " + esc(state.vector.dim) : "загружено как vector DB, индекс ещё не построен"}
+            </div>
+          </div>
+        `);
+      }
+
+      dbList.innerHTML = items.length ? items.join("") : `<div class="empty">Пока нет баз.</div>`;
+    }
+
+    async function initSql() {
+      if (state.SQL) return state.SQL;
+      loadStatus.textContent = "Загружаю SQL.js...";
+      state.SQL = await initSqlJs({
+        locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/${file}`
+      });
+      loadStatus.textContent = "SQL.js готов. Можно загружать .db файлы.";
+      return state.SQL;
+    }
+
+    function getTableNames(db) {
+      const stmt = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name");
+      const names = [];
+      while (stmt.step()) names.push(stmt.getAsObject().name);
+      stmt.free();
+      return names;
+    }
+
+    function tableColumns(db, table) {
+      const stmt = db.prepare(`PRAGMA table_info(${qi(table)})`);
+      const cols = [];
+      while (stmt.step()) {
+        const r = stmt.getAsObject();
+        cols.push({
+          name: r.name,
+          type: String(r.type || "").toUpperCase()
+        });
+      }
+      stmt.free();
+      return cols;
+    }
+
+    function looksTextColumn(col) {
+      const t = String(col.type || "").toUpperCase();
+      return !t || t.includes("TEXT") || t.includes("CHAR") || t.includes("CLOB") || t.includes("VARCHAR") || t.includes("INT") || t.includes("REAL") || t.includes("NUM");
+    }
+
+    function isVectorDatabase(db) {
+      try {
+        const tables = new Set(getTableNames(db));
+        if (!tables.has("vectors")) return false;
+        const cols = tableColumns(db, "vectors").map(c => c.name);
+        return cols.includes("word") && cols.includes("vector");
+      } catch (e) {
+        return false;
+      }
+    }
+
+    async function loadDbFromArrayBuffer({ name, size, buffer, fromStorage = false }) {
+      try {
+        const db = new state.SQL.Database(new Uint8Array(buffer));
+
+        if (isVectorDatabase(db)) {
+          if (state.vectorDb?.db) {
+            try { state.vectorDb.db.close(); } catch(e) {}
+          }
+          state.vectorDb = { name, size, db };
+          state.vector = null;
+          renderDbList();
+          loadStatus.textContent = `${name}: найден vector DB. Строю индекс похожих слов...`;
+          await buildVectorIndex();
+          return { ok: true, type: "vector" };
+        }
+
+        const names = getTableNames(db);
+        const tables = names
+          .map(tableName => {
+            const columns = tableColumns(db, tableName);
+            const searchable = columns.filter(looksTextColumn);
+            return { name: tableName, columns, searchable };
+          })
+          .filter(t => t.columns.length && t.searchable.length);
+
+        if (alreadyLoaded(name, size, "dict")) {
+          try { db.close(); } catch (e) {}
+          loadStatus.textContent = `${name}: такая словарная база уже открыта.`;
+          return { ok: true, type: "dict", skipped: true };
+        }
+
+        state.dictDbs.push({
+          id: crypto.randomUUID(),
+          name,
+          size,
+          db,
+          tables
+        });
+
+        loadStatus.textContent = fromStorage
+          ? `${name}: восстановлено из памяти браузера.`
+          : `${name}: загружено как словарная база.`;
+
+        return { ok: true, type: "dict" };
+      } catch (err) {
+        console.error(err);
+        loadStatus.innerHTML = `<span class="pill bad">ошибка</span> ${esc(name)}: не похоже на SQLite DB или файл повреждён.`;
+        return { ok: false, type: null, error: err };
+      }
+    }
+
+    async function loadFiles(files) {
+      await initSql();
+      if (!files || !files.length) return;
+
+      progress.hidden = false;
+      progress.value = 0;
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        loadStatus.textContent = `Читаю ${file.name}...`;
+        await sleep(0);
+
+        const buf = await file.arrayBuffer();
+        const result = await loadDbFromArrayBuffer({
+          name: file.name,
+          size: file.size,
+          buffer: buf,
+          fromStorage: false
+        });
+
+        if (result.ok && !result.skipped && state.saveUploads) {
+          await saveBufferToDevice({
+            type: result.type,
+            name: file.name,
+            size: file.size,
+            lastModified: file.lastModified || 0,
+            buffer: buf
+          });
+        }
+
+        progress.value = Math.round(((i + 1) / files.length) * 100);
+        renderDbList();
+        updateReadyStatus();
+        await sleep(0);
+      }
+
+      setTimeout(() => progress.hidden = true, 600);
+    }
+
+    async function buildVectorIndex() {
+      if (!state.vectorDb?.db) return;
+
+      const db = state.vectorDb.db;
+      progress.hidden = false;
+      progress.value = 0;
+
+      let count = 0;
+      try {
+        const c = db.exec("SELECT COUNT(*) AS c FROM vectors");
+        count = c?.[0]?.values?.[0]?.[0] || 0;
+      } catch (e) {
+        count = 0;
+      }
+
+      let first = null;
+      try {
+        const f = db.exec("SELECT vector FROM vectors LIMIT 1");
+        first = f?.[0]?.values?.[0]?.[0] || "";
+      } catch (e) {}
+
+      const dim = String(first || "").trim().split(/\s+/).filter(Boolean).length;
+      if (!count || !dim) {
+        searchStatus.textContent = "Vector DB найден, но не удалось прочитать размерность.";
+        return;
+      }
+
+      const words = new Array(count);
+      const data = new Float32Array(count * dim);
+      const norms = new Float32Array(count);
+      const index = new Map();
+
+      const stmt = db.prepare("SELECT word, vector FROM vectors");
+      let row = 0;
+
+      while (stmt.step()) {
+        const obj = stmt.getAsObject();
+        const word = String(obj.word);
+        const parts = String(obj.vector).trim().split(/\s+/);
+
+        words[row] = word;
+        index.set(word, row);
+
+        let normSq = 0;
+        const base = row * dim;
+        for (let j = 0; j < dim; j++) {
+          const v = Number(parts[j] || 0);
+          data[base + j] = v;
+          normSq += v * v;
+        }
+        norms[row] = Math.sqrt(normSq) || 1;
+
+        row++;
+        if (row % 600 === 0) {
+          progress.value = Math.round((row / count) * 100);
+          loadStatus.textContent = `Строю индекс word2vec: ${row.toLocaleString("ru-RU")} / ${count.toLocaleString("ru-RU")}`;
+          await sleep(0);
+        }
+      }
+      stmt.free();
+
+      state.vector = { ready: true, words, data, norms, index, count: row, dim };
+      progress.value = 100;
+      loadStatus.textContent = `Vector DB готов: ${row.toLocaleString("ru-RU")} слов, ${dim} координат.`;
+      renderDbList();
+      updateReadyStatus();
+      setTimeout(() => progress.hidden = true, 600);
+    }
+
+    function updateReadyStatus() {
+      const dictCount = state.dictDbs.length;
+      const vecReady = !!state.vector?.ready;
+      const parts = [];
+      parts.push(dictCount ? `Словарей: ${dictCount}` : "Словарей нет");
+      parts.push(vecReady ? `word2vec готов: ${state.vector.count.toLocaleString("ru-RU")} слов` : "word2vec не загружен");
+      searchStatus.textContent = parts.join(" · ");
+    }
+
+    function buildSearchCursors(query, terms) {
+      const cursors = [];
+      for (const d of state.dictDbs) {
+        for (const t of d.tables) {
+          cursors.push({
+            dbItem: d,
+            table: t,
+            offset: 0,
+            done: false,
+            query,
+            terms
+          });
+        }
+      }
+      return cursors;
+    }
+
+    function makeWhere(table, terms) {
+      const cols = table.searchable;
+      if (!terms.length) return { where: "", params: [] };
+
+      const params = [];
+      const blocks = [];
+
+      for (const term of terms) {
+        const oneTerm = cols.map(c => `CAST(${qi(c.name)} AS TEXT) LIKE ? ESCAPE '\\'`).join(" OR ");
+        blocks.push(`(${oneTerm})`);
+        for (let i = 0; i < cols.length; i++) {
+          params.push(`%${escapeLike(term)}%`);
+        }
+      }
+
+      return { where: `WHERE ${blocks.join(" OR ")}`, params };
+    }
+
+    function normalizeTerms(q) {
+      const s = String(q || "").trim();
+      return s ? [s] : [];
+    }
+
+    async function semanticTermsForQuery(q) {
+      if (!$("semanticExpand").checked || !state.vector?.ready) return [];
+      const clean = String(q || "").trim();
+      if (!clean || /\s/.test(clean)) return [];
+      if (!isKoreanLike(clean)) return [];
+      const top = await mostSimilar(clean, Math.min(8, Number($("topN").value) || 8), false);
+      return top.map(x => x.word);
+    }
+
+    async function startSearch() {
+      const query = $("query").value.trim();
+      const baseTerms = normalizeTerms(query);
+      const extraTerms = await semanticTermsForQuery(query);
+      const terms = [...baseTerms, ...extraTerms].filter(Boolean);
+
+      state.lastTerms = terms;
+      state.search = {
+        query,
+        terms,
+        cursors: buildSearchCursors(query, terms),
+        done: false
+      };
+      state.rendered = 0;
+
+      results.innerHTML = "";
+      similarBox.innerHTML = "";
+
+      if (!state.dictDbs.length) {
+        results.innerHTML = `<div class="empty">Сначала загрузи словарную .db базу.</div>`;
+        resultInfo.textContent = "Нет словарных баз.";
+        loadMoreBtn.disabled = true;
+        return;
+      }
+
+      if (!query) {
+        resultInfo.textContent = "Показываю все записи порциями.";
+      } else if (extraTerms.length) {
+        resultInfo.textContent = `Поиск: ${query}. Дополнительно: ${extraTerms.join(", ")}`;
+      } else {
+        resultInfo.textContent = `Поиск: ${query}`;
+      }
+
+      await loadMore();
+    }
+
+    async function loadMore() {
+      if (!state.search) return;
+      const batchSize = Math.max(1, Number($("batchSize").value) || 300);
+      let remaining = batchSize;
+      const out = [];
+
+      loadMoreBtn.disabled = true;
+      searchStatus.textContent = "Ищу и подгружаю результаты...";
+      await sleep(0);
+
+      for (const cursor of state.search.cursors) {
+        if (remaining <= 0) break;
+        if (cursor.done) continue;
+
+        const { dbItem, table } = cursor;
+        const { where, params } = makeWhere(table, state.search.terms);
+        const limitForCursor = remaining;
+        const sql = `SELECT * FROM ${qi(table.name)} ${where} LIMIT ${limitForCursor} OFFSET ${cursor.offset}`;
+        let got = 0;
+
+        try {
+          const stmt = dbItem.db.prepare(sql);
+          stmt.bind(params);
+          while (stmt.step()) {
+            got++;
+            const obj = stmt.getAsObject();
+            out.push({ dbName: dbItem.name, tableName: table.name, row: obj });
+          }
+          stmt.free();
+        } catch (err) {
+          console.error(err, sql);
+          cursor.done = true;
+          continue;
+        }
+
+        cursor.offset += got;
+        remaining -= got;
+
+        if (got === 0 || got < limitForCursor) {
+          cursor.done = true;
+        }
+
+        await sleep(0);
+      }
+
+      appendResults(out);
+
+      const allDone = state.search.cursors.every(c => c.done);
+      state.search.done = allDone;
+      loadMoreBtn.disabled = allDone || !state.search;
+
+      if (allDone) {
+        searchStatus.textContent = out.length
+          ? "Все найденные записи загружены."
+          : "Больше результатов нет.";
+      } else {
+        searchStatus.textContent = "Можно загрузить ещё.";
+      }
+
+      counters.textContent = `Показано: ${state.rendered.toLocaleString("ru-RU")}`;
+      if (!state.rendered) {
+        results.innerHTML = `<div class="empty">Ничего не найдено. Попробуй другое слово или отключи/включи семантическое расширение.</div>`;
+      }
+    }
+
+    function appendResults(items) {
+      if (!items.length) {
+        if (!state.rendered) {
+          results.innerHTML = `<div class="empty">Ничего не найдено.</div>`;
+        }
+        return;
+      }
+
+      if (!state.rendered) results.innerHTML = "";
+
+      const html = items.map(item => {
+        state.rendered++;
+        const fields = Object.entries(item.row)
+          .filter(([_, v]) => v !== null && v !== undefined && String(v) !== "")
+          .map(([k, v]) => {
+            let value = v;
+            if (value instanceof Uint8Array) value = `[BLOB ${value.length} bytes]`;
+            return `
+              <div class="field">
+                <div class="key">${esc(k)}</div>
+                <div class="value">${highlight(esc(value), state.lastTerms)}</div>
+              </div>
+            `;
+          }).join("");
+
+        return `
+          <article class="result">
+            <div class="result-top">
+              <div class="result-source">${esc(item.dbName)} · ${esc(item.tableName)}</div>
+              <div class="result-num">#${state.rendered.toLocaleString("ru-RU")}</div>
+            </div>
+            <div class="fields">${fields || `<div class="small">Пустая запись</div>`}</div>
+          </article>
+        `;
+      }).join("");
+
+      results.insertAdjacentHTML("beforeend", html);
+      resultInfo.textContent = `Показано записей: ${state.rendered.toLocaleString("ru-RU")}`;
+    }
+
+    function highlight(safeHtml, terms) {
+      const cleanTerms = [...new Set((terms || []).filter(Boolean))]
+        .sort((a, b) => b.length - a.length)
+        .slice(0, 20);
+
+      let out = safeHtml;
+      for (const term of cleanTerms) {
+        const safeTerm = esc(term).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        if (!safeTerm) continue;
+        out = out.replace(new RegExp(safeTerm, "gi"), m => `<mark>${m}</mark>`);
+      }
+      return out;
+    }
+
+    async function mostSimilar(word, topN = 15, render = true) {
+      if (!state.vector?.ready) {
+        searchStatus.textContent = "Сначала загрузи nk200sg7_vectors.db.";
+        return [];
+      }
+
+      word = String(word || "").trim();
+      if (!word) {
+        searchStatus.textContent = "Введи корейское слово.";
+        return [];
+      }
+
+      const vec = state.vector;
+      const idx = vec.index.get(word);
+
+      if (idx === undefined) {
+        const suggestions = vec.words.filter(w => w.includes(word)).slice(0, 30);
+        if (render) {
+          similarBox.innerHTML = suggestions.length
+            ? suggestions.map(w => `<span class="chip" data-word="${esc(w)}">${esc(w)}</span>`).join("")
+            : `<span class="pill bad">слово не найдено в модели</span>`;
+          bindChipClicks();
+          searchStatus.textContent = suggestions.length
+            ? `Точного слова нет в модели. Показал слова, которые содержат “${word}”.`
+            : `Слова “${word}” нет в модели.`;
+        }
+        return suggestions.map(w => ({word: w, score: 0}));
+      }
+
+      const dim = vec.dim;
+      const base = idx * dim;
+      const qNorm = vec.norms[idx] || 1;
+      const best = [];
+
+      searchStatus.textContent = `Считаю похожие слова для ${word}...`;
+      await sleep(0);
+
+      for (let i = 0; i < vec.count; i++) {
+        if (i === idx) continue;
+
+        const ib = i * dim;
+        let dot = 0;
+        for (let j = 0; j < dim; j++) {
+          dot += vec.data[base + j] * vec.data[ib + j];
+        }
+
+        const score = dot / (qNorm * (vec.norms[i] || 1));
+        if (best.length < topN) {
+          best.push({ word: vec.words[i], score });
+          best.sort((a, b) => a.score - b.score);
+        } else if (score > best[0].score) {
+          best[0] = { word: vec.words[i], score };
+          best.sort((a, b) => a.score - b.score);
+        }
+
+        if (i % 8000 === 0) await sleep(0);
+      }
+
+      best.sort((a, b) => b.score - a.score);
+
+      if (render) {
+        similarBox.innerHTML = best.map(x => `
+          <span class="chip" data-word="${esc(x.word)}">
+            ${esc(x.word)}
+            <span class="score">${x.score.toFixed(3)}</span>
+          </span>
+        `).join("");
+        bindChipClicks();
+        searchStatus.textContent = `Похожие слова для ${word}: ${best.length}`;
+      }
+
+      return best;
+    }
+
+    function bindChipClicks() {
+      similarBox.querySelectorAll(".chip[data-word]").forEach(el => {
+        el.addEventListener("click", () => {
+          $("query").value = el.dataset.word;
+          startSearch();
+        });
+      });
+    }
+
+    saveUploads.addEventListener("change", () => {
+      setSaveUploadsPreference(saveUploads.checked);
+      refreshStorageStatus(saveUploads.checked ? "Автосохранение включено." : "Автосохранение выключено. Уже сохранённые копии не удалены.");
+    });
+
+    restoreBtn.addEventListener("click", () => restoreSavedFiles({ silent: false }));
+    clearStoredBtn.addEventListener("click", clearSavedFiles);
+
+    fileInput.addEventListener("change", e => loadFiles(e.target.files));
+
+    drop.addEventListener("dragover", e => {
+      e.preventDefault();
+      drop.classList.add("drag");
+    });
+
+    drop.addEventListener("dragleave", () => drop.classList.remove("drag"));
+
+    drop.addEventListener("drop", e => {
+      e.preventDefault();
+      drop.classList.remove("drag");
+      loadFiles(e.dataTransfer.files);
+    });
+
+    $("searchBtn").addEventListener("click", startSearch);
+    $("query").addEventListener("keydown", e => {
+      if (e.key === "Enter") startSearch();
+    });
+
+    $("similarBtn").addEventListener("click", async () => {
+      const q = $("query").value.trim();
+      similarBox.innerHTML = "";
+      await mostSimilar(q, Math.max(3, Number($("topN").value) || 15), true);
+    });
+
+    loadMoreBtn.addEventListener("click", loadMore);
+
+    $("clearBtn").addEventListener("click", () => {
+      state.search = null;
+      state.rendered = 0;
+      state.lastTerms = [];
+      results.innerHTML = `<div class="empty">Очищено.</div>`;
+      resultInfo.textContent = "Результатов пока нет.";
+      counters.textContent = "";
+      similarBox.innerHTML = "";
+      loadMoreBtn.disabled = true;
+      updateReadyStatus();
+    });
+
+    async function initApp() {
+      state.saveUploads = getSaveUploadsPreference();
+      saveUploads.checked = state.saveUploads;
+
+      try {
+        await initSql();
+        await openFileStorage();
+        await requestPersistentBrowserStorage();
+        await refreshStorageStatus();
+        if (state.saveUploads) {
+          await restoreSavedFiles({ silent: true });
+        }
+      } catch (err) {
+        console.error(err);
+        if (!state.SQL) {
+          loadStatus.innerHTML = `<span class="pill bad">ошибка</span> Не удалось загрузить SQL.js. Проверь интернет или CDN.`;
+        }
+      }
+    }
+
+    initApp();
+  </script>
+</body>
+</html>
