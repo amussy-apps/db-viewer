@@ -1,0 +1,1628 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>조선말 사전</title>
+  <style>
+    [hidden]{display:none!important}
+    :root{
+      --bg:#0b0f14;--panel:#101720;--panel2:#141d29;--line:#233044;--line2:#1b2636;
+      --text:#eef3f8;--muted:#94a1b2;--muted2:#6f7b8c;--accent:#8bb7ff;--accent2:#c8ddff;
+      --ok:#95e8b0;--warn:#f4d27e;--bad:#ff9b9b;--mark:rgba(244,210,126,.20);--markBorder:rgba(244,210,126,.45);--markText:inherit;
+      --radius:20px;--shadow:0 22px 60px rgba(0,0,0,.32)
+    }
+    *{box-sizing:border-box}
+    html{color-scheme:dark}
+    body{margin:0;min-height:100vh;background:radial-gradient(circle at 10% 0%,rgba(86,119,170,.2),transparent 32rem),linear-gradient(180deg,#0c1118 0%,var(--bg) 100%);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+    button,input,select{font:inherit}button{user-select:none}
+    .app{width:min(1120px,calc(100% - 34px));margin:0 auto;padding:26px 0 56px}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:20px}
+    .brand{min-width:0}.brandLine{display:flex;align-items:center;gap:11px}
+    h1{margin:0;font-size:26px;line-height:1;letter-spacing:-.045em}.subtitle{margin:7px 0 0;color:var(--muted);font-size:14px;line-height:1.45}
+    .iconBtn,.btn{border:1px solid var(--line);background:rgba(255,255,255,.035);color:var(--text);border-radius:14px;cursor:pointer;transition:background .13s ease,border-color .13s ease,transform .06s ease}
+    .iconBtn{min-width:42px;height:42px;padding:0 12px;font-weight:900;font-size:18px;display:inline-flex;align-items:center;justify-content:center}.btn{padding:10px 13px}.btn.small{padding:7px 10px;border-radius:11px;font-size:13px}.btn.primary{background:#2d61aa;border-color:#578ce2;color:#fff;font-weight:850}.btn.ghost{background:transparent}.btn.warn{background:#312615;border-color:#6c551e}.btn:hover,.iconBtn:hover{background:rgba(255,255,255,.075);border-color:#425878}.btn:active,.iconBtn:active{transform:translateY(1px)}.btn:disabled{opacity:.55;cursor:not-allowed}
+    .statusPill{display:inline-flex;align-items:center;gap:8px;color:var(--muted);font-size:13px;border:1px solid var(--line2);background:rgba(255,255,255,.025);border-radius:999px;padding:8px 11px;white-space:nowrap}#globalStatusDot{color:var(--accent)}
+    .panel{background:rgba(16,23,32,.82);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:blur(12px)}
+    .searchPanel{padding:18px;margin-bottom:16px}.dictLine{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:14px}.dictTabs{display:flex;flex-wrap:wrap;gap:8px;min-width:0;flex:1}.tab{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:999px;padding:9px 13px;cursor:pointer}.tab.active{background:#1d3d6b;border-color:#6096ed;color:white;font-weight:850}
+    .searchGrid{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px}#searchInput{width:100%;border:1px solid var(--line);background:#0d141d;color:var(--text);outline:none;border-radius:17px;padding:15px 16px;font-size:24px;font-weight:800;letter-spacing:-.02em}#searchInput:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(139,183,255,.13)}
+    .filters{display:grid;grid-template-columns:minmax(210px,1fr) 165px 150px;gap:10px;margin-top:10px}.control{width:100%;border:1px solid var(--line);background:#0d141d;color:var(--text);border-radius:13px;padding:11px 12px;outline:none}.control:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(139,183,255,.11)}
+    .nearbyBox{margin-top:12px;border-top:1px solid var(--line2);padding-top:12px}.nearbyHeader{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:8px}.note{color:var(--muted);font-size:13px;line-height:1.45}.chips{display:flex;flex-wrap:wrap;gap:7px}.chip{border:1px solid #33435b;background:#0e1722;color:var(--accent2);border-radius:999px;padding:7px 10px;cursor:pointer}.chip:hover{border-color:var(--accent);background:#172537}.score{opacity:.6;font-size:12px;margin-left:5px}
+    .resultsPanel{padding:0;overflow:hidden}.resultsTop{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 18px;border-bottom:1px solid var(--line2)}.sectionTitle{margin:0;font-weight:900;letter-spacing:-.02em}.sectionTitle small{color:var(--muted2);font-weight:650;margin-left:6px}.resultsMeta{color:var(--muted);font-size:14px;line-height:1.45}#resultsMeta{padding:12px 18px 0}.resultsList{padding:4px 0}.resultRow{display:grid;grid-template-columns:135px minmax(0,1fr);gap:18px;padding:19px 26px;border-top:1px solid var(--line2)}.resultRow:first-child{border-top:0}.resultRow.noDict{grid-template-columns:minmax(0,1fr)}.resultDict{color:var(--muted);font-size:13px;padding-top:8px;white-space:nowrap}.dictArticle{min-width:0}.articleHead{font-size:clamp(26px,3.2vw,42px);font-weight:900;letter-spacing:-.04em;line-height:1.12;margin-bottom:11px;cursor:pointer}.articleDef{color:#dfe7f2;font-size:20px;line-height:1.56;cursor:text}.articleDef div+div{margin-top:5px}.nsBadges{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}.nsBadge{display:inline-flex;align-items:center;gap:6px;border:1px solid #355d44;background:#102419;color:#abefc0;border-radius:999px;padding:6px 10px;font-size:14px;font-weight:850;cursor:pointer}.nsBadge b{color:#eaffef}mark{background:var(--mark);color:var(--markText);border-radius:6px;padding:0 .12em;border-bottom:1px solid var(--markBorder);box-decoration-break:clone;-webkit-box-decoration-break:clone}.empty{margin:18px;border:1px dashed #34445c;background:rgba(255,255,255,.02);border-radius:16px;padding:24px;color:var(--muted);text-align:center}.pager{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px;padding:14px 18px 18px;border-top:1px solid var(--line2)}.pageBtns{display:flex;flex-wrap:wrap;gap:6px}
+    .fileInput{width:100%;max-width:100%;min-width:0;color:var(--muted);border:1px dashed #40516a;background:rgba(139,183,255,.055);padding:12px;border-radius:14px}.drawerOverlay{position:fixed;inset:0;background:rgba(0,0,0,.46);opacity:0;pointer-events:none;transition:opacity .16s ease;z-index:40}.drawer{position:fixed;top:0;left:0;height:100vh;width:min(390px,calc(100vw - 28px));max-width:calc(100vw - 28px);background:#0e1520;border-right:1px solid var(--line);box-shadow:18px 0 50px rgba(0,0,0,.35);transform:translateX(-103%);transition:transform .18s ease;z-index:50;display:flex;flex-direction:column;overflow-x:hidden}body.drawerOpen .drawer{transform:translateX(0)}body.drawerOpen .drawerOverlay{opacity:1;pointer-events:auto}.drawerHead{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:18px;border-bottom:1px solid var(--line2)}.drawerTitle{font-size:20px;font-weight:900;letter-spacing:-.03em}.drawerBody{padding:18px;overflow-y:auto;overflow-x:hidden;display:grid;gap:18px;min-width:0}.drawerSection{display:grid;gap:10px;min-width:0}.drawerLabel{color:var(--muted);font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.08em}.status{color:var(--muted);font-size:13px;line-height:1.45;border-top:1px solid var(--line2);padding-top:12px}.slots{display:grid;gap:8px;min-width:0}.slot{border:1px solid var(--line2);background:rgba(255,255,255,.025);border-radius:14px;padding:10px;min-width:0}.slotTop{display:flex;justify-content:space-between;gap:8px;align-items:center;min-width:0}.slotName{font-weight:850;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.slotState{font-size:12px;color:var(--muted2);flex:0 0 auto}.slot.loaded .slotState{color:var(--ok)}.slot.vector.loaded .slotState{color:var(--warn)}.slotFile{color:var(--muted);font-size:12px;overflow-wrap:anywhere;word-break:break-word;margin-top:4px;min-width:0}.switchRow{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:12px;border:1px solid var(--line2);border-radius:14px;background:rgba(255,255,255,.025);min-width:0;overflow:hidden}.switchText{min-width:0}.switchText strong{display:block}.switchText span{display:block;color:var(--muted);font-size:13px;margin-top:3px}.switch{position:relative;width:48px;height:28px;flex:0 0 auto}.switch input{opacity:0;width:0;height:0}.slider{position:absolute;inset:0;cursor:pointer;background:#293346;border:1px solid #3b485d;border-radius:999px;transition:.15s}.slider:before{content:"";position:absolute;height:20px;width:20px;left:3px;top:3px;background:#aeb8c8;border-radius:50%;transition:.15s}.switch input:checked+.slider{background:#244b32;border-color:#458b5d}.switch input:checked+.slider:before{transform:translateX(20px);background:#b4f4c5}
+
+    .marksBar{margin:0;display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap;min-width:0;flex:0 1 auto}
+    .marksBtn{height:38px;border:1px solid var(--line);background:rgba(139,183,255,.06);color:var(--accent2);border-radius:999px;padding:0 14px;cursor:pointer;font-weight:850;white-space:nowrap}
+    .marksBtn:hover{background:rgba(139,183,255,.09);border-color:var(--accent)}
+    .activeFilter{display:inline-flex;align-items:center;gap:8px;border:1px solid #3f5e83;background:#111d2d;color:#d5e7ff;border-radius:999px;padding:7px 10px;font-size:13px;font-weight:780;max-width:100%;overflow-wrap:anywhere}
+    .activeFilter button{border:0;background:transparent;color:var(--muted);cursor:pointer;font-weight:900;font-size:16px;padding:0 2px}.activeFilter button:hover{color:var(--bad)}
+    .marksPanel{margin-top:10px;border:1px solid var(--line2);background:rgba(8,13,20,.55);border-radius:17px;padding:12px;box-shadow:0 12px 30px rgba(0,0,0,.16)}
+    .marksPanelHead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.marksPanelTitle{font-weight:900;letter-spacing:-.02em}.marksClose{border:0;background:transparent;color:var(--muted);font-size:20px;cursor:pointer}.marksClose:hover{color:var(--text)}
+    .marksGroup{margin-top:11px}.marksGroup:first-of-type{margin-top:0}.marksGroupTitle{color:var(--muted);font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;margin-bottom:7px}
+    .markChips{display:flex;flex-wrap:wrap;gap:6px;max-height:168px;overflow:auto;padding-right:2px}.markChip{border:1px solid #303f56;background:#0d1621;color:#dbe6f7;border-radius:999px;padding:6px 9px;cursor:pointer;font-size:13px}.markChip:hover{border-color:var(--accent);background:#162338}.markChip.active{background:#244569;border-color:#75a7f2;color:#fff;font-weight:850}
+
+    .drawer *{max-width:100%}
+    .gate{min-height:100vh;display:grid;place-items:center;padding:28px 16px}.gateCard{max-width:760px;width:100%;padding:28px}.gateTitle{margin:0 0 10px;font-size:clamp(34px,6vw,58px);line-height:.95;letter-spacing:-.06em}.gateUpload{margin-top:20px;display:grid;gap:10px}.loader{width:10px;height:10px;border-radius:50%;background:var(--accent);display:inline-block;box-shadow:0 0 0 5px rgba(139,183,255,.12)}
+    @media(max-width:720px){.app{width:min(100% - 22px,1120px);padding-top:14px}.topbar{align-items:flex-start}.statusPill{display:none}.dictLine{display:grid;gap:10px}.marksBar{justify-content:flex-start}.searchGrid{grid-template-columns:1fr}.filters{grid-template-columns:1fr}.resultRow{grid-template-columns:1fr;gap:7px;padding:17px 16px}.resultDict{padding:0}.resultsTop{align-items:flex-start;flex-direction:column}.gateCard{padding:22px}.articleDef{font-size:18px}}
+  </style>
+</head>
+<body>
+  <section id="gate" class="gate">
+    <div class="gateCard panel">
+      <div class="loader"></div>
+      <h1 class="gateTitle">조선말 사전</h1>
+      <p class="subtitle">Загрузи один ZIP-пакет: четыре словаря, векторная DB и <b>north_south_merged_clean.csv</b> внутри. Отдельных CSV/таблиц больше нет.</p>
+      <div class="gateUpload">
+        <input id="gateZip" class="fileInput" type="file" accept=".zip,application/zip" />
+        <div id="gateStatus" class="note">Ожидание ZIP.</div>
+      </div>
+    </div>
+  </section>
+
+  <main id="main" class="app" hidden>
+    <div class="topbar">
+      <div class="brand">
+        <div class="brandLine"><button id="drawerToggle" class="iconBtn" title="панель">•••</button><h1>조선말 사전</h1></div>
+        <p class="subtitle">4 словаря · южные соответствия · векторные соответствия</p>
+      </div>
+      <div class="statusPill"><span id="globalStatusDot">●</span><span id="globalStatus">готов</span></div>
+    </div>
+
+    <section class="searchPanel panel">
+      <div class="dictLine">
+        <div id="dictTabs" class="dictTabs"></div>
+        <div id="marksBar" class="marksBar" hidden></div>
+      </div>
+      <div id="marksPanel" class="marksPanel" hidden></div>
+      <div class="searchGrid">
+        <input id="searchInput" autocomplete="off" spellcheck="false" placeholder="Введите слово…" />
+        <button id="searchBtn" class="btn primary">искать</button>
+      </div>
+      <div class="filters">
+        <select id="searchScope" class="control">
+          <option value="head" selected>по заголовкам статей</option>
+          <option value="content">по содержанию статей</option>
+          <option value="all">по заголовкам и содержанию</option>
+        </select>
+        <select id="searchMode" class="control">
+          <option value="contains">содержит</option>
+          <option value="starts">начинается с</option>
+          <option value="ends">заканчивается на</option>
+          <option value="exact">точно</option>
+        </select>
+        <select id="pageSize" class="control">
+          <option value="100">100</option>
+          <option value="300" selected>300</option>
+          <option value="1000">1000</option>
+          <option value="3000">3000</option>
+        </select>
+      </div>
+      <div id="nearbyBox" class="nearbyBox" hidden>
+        <div class="nearbyHeader"><span id="nearbyStatus" class="note">векторные соответствия</span><div style="display:flex;gap:8px;align-items:center"><button id="nearbyCalc" type="button" class="btn small ghost" hidden>посчитать</button><button id="nearbyMore" type="button" class="btn small ghost" hidden>показать больше</button></div></div>
+        <div id="nearbyChips" class="chips"></div>
+      </div>
+    </section>
+
+    <section class="resultsPanel panel">
+      <div class="resultsTop">
+        <h2 class="sectionTitle">Результаты <small id="resultsHint"></small></h2>
+        <div>
+          <button id="loadMoreBtn" class="btn small">загрузить ещё</button>
+          <button id="autoLoadBtn" class="btn small ghost">до конца</button>
+        </div>
+      </div>
+      <div id="resultsMeta" class="resultsMeta"></div>
+      <div id="resultsEmpty" class="empty">Загрузи ZIP: словари откроются с начала даже без запроса.</div>
+      <div id="resultsWrap" hidden>
+        <div id="resultsBody" class="resultsList"></div>
+        <div id="pager" class="pager"><span id="pageInfo" class="note"></span><div id="pageBtns" class="pageBtns"></div></div>
+      </div>
+    </section>
+  </main>
+
+  <div id="drawerOverlay" class="drawerOverlay"></div>
+  <aside id="drawer" class="drawer">
+    <div class="drawerHead"><div class="drawerTitle">панель</div><button id="drawerClose" class="iconBtn">×</button></div>
+    <div class="drawerBody">
+      <section class="drawerSection">
+        <div class="drawerLabel">ZIP-пакет</div>
+        <input id="zipInput" class="fileInput" type="file" accept=".zip,application/zip" />
+        <button id="clearBtn" class="btn small warn">очистить</button>
+      </section>
+      <section class="drawerSection">
+        <div class="drawerLabel">Настройки</div>
+        <label class="switchRow">
+          <span class="switchText"><strong>Южные соответствия</strong><span>Показывать бейдж «Юг» только при полном совпадении заголовка статьи с 북한말.</span></span>
+          <span class="switch"><input id="southToggle" type="checkbox" checked><span class="slider"></span></span>
+        </label>
+        <label class="switchRow">
+          <span class="switchText"><strong>Векторные соответствия</strong><span>Показывать векторные соответствия под строкой поиска.</span></span>
+          <span class="switch"><input id="nearbyToggle" type="checkbox" checked><span class="slider"></span></span>
+        </label>
+      </section>
+      <section class="drawerSection">
+        <div class="drawerLabel">Загружено</div>
+        <div id="slots" class="slots"></div>
+      </section>
+      <div id="sideStatus" class="status">Ожидание ZIP-пакета.</div>
+    </div>
+  </aside>
+
+  <script src="https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sql.js@1.10.3/dist/sql-wasm.js"></script>
+  <script>
+  (() => {
+    const DICT_SLOTS = [
+      { key:'ko_ru', label:'조로-로조', aliases:['krrk','korru','ruko','ru'] },
+      { key:'biyak', label:'비약 사전', aliases:['biyak','비약'] },
+      { key:'ko_en', label:'조영-영조', aliases:['keek','keng','enko','koen','en'] },
+      { key:'ko_ko', label:'조', aliases:['kk','koko','clean'] }
+    ];
+    const DICT_LABELS = {
+      "biyak": {
+            "domains": [
+                  "콤퓨터",
+                  "기계공학",
+                  "수학",
+                  "전자공학",
+                  "경제",
+                  "물리학",
+                  "광학",
+                  "전기공학",
+                  "과학기술",
+                  "화학",
+                  "항공우주",
+                  "생물학",
+                  "핵기술",
+                  "토목건축",
+                  "금속공학",
+                  "의학",
+                  "지질학",
+                  "정보공학",
+                  "금융",
+                  "무역",
+                  "경제관리",
+                  "력학",
+                  "광업",
+                  "자연지리",
+                  "농업",
+                  "경공업",
+                  "인체해부학",
+                  "환경과학",
+                  "통신기술",
+                  "자동화공학",
+                  "회계",
+                  "곤충학",
+                  "법률",
+                  "원유 및 가스",
+                  "유기화학",
+                  "촬영기술",
+                  "공업기술",
+                  "천문학",
+                  "식물학",
+                  "통계",
+                  "군사",
+                  "생화학",
+                  "로동경제",
+                  "재료과학",
+                  "레이자기술",
+                  "세금",
+                  "화학공업",
+                  "생태학",
+                  "기상학",
+                  "교통운수",
+                  "계기",
+                  "측량",
+                  "무척추동물",
+                  "차량",
+                  "목재가공",
+                  "동력공학",
+                  "방직공업",
+                  "수상운수",
+                  "가격",
+                  "재정",
+                  "경영학",
+                  "선박",
+                  "류체력학",
+                  "철도운수",
+                  "해양학",
+                  "내과",
+                  "인쇄공업",
+                  "계량과학",
+                  "사회과학",
+                  "보험",
+                  "지구물리",
+                  "영화기술",
+                  "분석화학",
+                  "고려의학",
+                  "고생물학",
+                  "열력학",
+                  "미생물학",
+                  "약물학",
+                  "광물",
+                  "경제계획",
+                  "무기화학",
+                  "농기계",
+                  "구강과",
+                  "음향학",
+                  "생리학",
+                  "유전학",
+                  "척추동물",
+                  "토양학",
+                  "결정학",
+                  "동물학",
+                  "에네르기자원",
+                  "TV기술",
+                  "공업경제",
+                  "전자기학",
+                  "감광재료",
+                  "레이다기술",
+                  "안전공학",
+                  "랭동기술",
+                  "식물보호",
+                  "암석학",
+                  "심리학",
+                  "조직학",
+                  "특허",
+                  "전신설비",
+                  "공업로",
+                  "면역학",
+                  "칠감공업",
+                  "식량가공",
+                  "발생학",
+                  "유리공업",
+                  "수문학",
+                  "고무공업",
+                  "산부인과",
+                  "수리공학",
+                  "농약",
+                  "안과",
+                  "원예학",
+                  "수산업",
+                  "열공학",
+                  "도로운수",
+                  "이비인후과",
+                  "어류학",
+                  "임대",
+                  "외과",
+                  "세포학",
+                  "도서관학",
+                  "기초의학",
+                  "림상의학",
+                  "플라즈마",
+                  "농학",
+                  "농업과학",
+                  "가구공업",
+                  "시험방법",
+                  "물감공업",
+                  "기구",
+                  "언어문자",
+                  "포장기술",
+                  "조류학",
+                  "량자학",
+                  "기후학",
+                  "종양학",
+                  "농업경제",
+                  "고에네르기",
+                  "진공기술",
+                  "우편",
+                  "수의학",
+                  "종이공업",
+                  "특수의학",
+                  "적외선기술",
+                  "피복 및 신발",
+                  "인류학",
+                  "도자기공업",
+                  "유지공업",
+                  "수지공업",
+                  "비루스학",
+                  "천체물리",
+                  "색감공업",
+                  "규격",
+                  "생물물리",
+                  "가소물공업",
+                  "축산업",
+                  "가죽공업",
+                  "병리학",
+                  "통용보조약재",
+                  "농작물",
+                  "건설경제",
+                  "시약공업",
+                  "비료학",
+                  "접착제공업",
+                  "식료공업",
+                  "저온물리",
+                  "방송기술",
+                  "리론물리",
+                  "피부과",
+                  "독물학",
+                  "비뇨기과",
+                  "원격수감기술",
+                  "고식물학",
+                  "농업기술",
+                  "보석",
+                  "상대성리론",
+                  "통계물리",
+                  "소아과",
+                  "지구화학",
+                  "가금업",
+                  "물리화학",
+                  "철제품",
+                  "무역경제",
+                  "잠업",
+                  "생물진화",
+                  "분자생물학",
+                  "고고학",
+                  "지진학",
+                  "목축업",
+                  "성병학",
+                  "양봉학",
+                  "림업",
+                  "어류",
+                  "에네르기",
+                  "피복"
+            ],
+            "styles": []
+      },
+      "ko_en": {
+            "domains": [
+                  "식물",
+                  "화학",
+                  "콤퓨터",
+                  "의학",
+                  "동물",
+                  "병리",
+                  "생물",
+                  "물리",
+                  "해부",
+                  "수학",
+                  "전기",
+                  "광물",
+                  "곤충",
+                  "기계",
+                  "해사",
+                  "음악",
+                  "법",
+                  "물고기",
+                  "지질",
+                  "군사",
+                  "건축",
+                  "약학",
+                  "천문",
+                  "언어",
+                  "생리",
+                  "항공",
+                  "전자",
+                  "경제",
+                  "기상",
+                  "문법",
+                  "철학",
+                  "통신",
+                  "심리",
+                  "인쇄",
+                  "외과",
+                  "어음",
+                  "지리",
+                  "체육",
+                  "광학",
+                  "정신의학",
+                  "시",
+                  "야금",
+                  "수의",
+                  "사진",
+                  "불교",
+                  "미술",
+                  "농업",
+                  "론리",
+                  "성경",
+                  "금속",
+                  "기호",
+                  "상업",
+                  "정보",
+                  "원자력",
+                  "조개",
+                  "건설",
+                  "방직",
+                  "토목",
+                  "고고",
+                  "암석",
+                  "생태",
+                  "종교",
+                  "세균",
+                  "보험",
+                  "원예",
+                  "시학",
+                  "고려의학",
+                  "결정",
+                  "배무이",
+                  "회계",
+                  "해양",
+                  "금속가공",
+                  "민속",
+                  "우주",
+                  "구강",
+                  "광산",
+                  "안과",
+                  "증권",
+                  "신학",
+                  "인류학",
+                  "고생물",
+                  "통계",
+                  "광업",
+                  "연극",
+                  "제본",
+                  "목공",
+                  "해군",
+                  "교육",
+                  "사회학",
+                  "영화",
+                  "측량",
+                  "력사",
+                  "정치",
+                  "문학",
+                  "법학",
+                  "시계",
+                  "운수",
+                  "자동차",
+                  "처방",
+                  "림업",
+                  "미식축구",
+                  "힌두교",
+                  "수사",
+                  "금융",
+                  "요업",
+                  "피복",
+                  "크리케트",
+                  "미신",
+                  "골프",
+                  "제지",
+                  "석공",
+                  "축산",
+                  "교회",
+                  "극장",
+                  "출판",
+                  "체신",
+                  "경영",
+                  "수산",
+                  "염색",
+                  "도서관",
+                  "장기",
+                  "정신분석",
+                  "발레",
+                  "토양",
+                  "유희",
+                  "화페",
+                  "기하",
+                  "낚시",
+                  "활자",
+                  "동방정교회",
+                  "경마",
+                  "수리",
+                  "유리제조",
+                  "권투",
+                  "료리",
+                  "원자",
+                  "스키",
+                  "영국국교회",
+                  "우편",
+                  "축구",
+                  "로동",
+                  "이슬람교",
+                  "력학",
+                  "문예",
+                  "은행",
+                  "면역",
+                  "축성",
+                  "약물",
+                  "춤",
+                  "레스링",
+                  "문화인류학",
+                  "수영",
+                  "신문",
+                  "보석",
+                  "자기",
+                  "당구",
+                  "악기",
+                  "마술",
+                  "무역",
+                  "체조",
+                  "격검",
+                  "예술",
+                  "유전",
+                  "재정",
+                  "점성",
+                  "지구물리",
+                  "국제법",
+                  "우표취미",
+                  "색감",
+                  "음향",
+                  "자동화",
+                  "고려약학",
+                  "광고",
+                  "무용",
+                  "심령",
+                  "륜리",
+                  "가구",
+                  "공학",
+                  "해운",
+                  "미생물",
+                  "사냥",
+                  "세포",
+                  "방송",
+                  "무선",
+                  "사회",
+                  "섬유",
+                  "산과",
+                  "외교",
+                  "보링",
+                  "지진",
+                  "활쏘기",
+                  "로케트",
+                  "농약",
+                  "잠학",
+                  "고고학",
+                  "양조",
+                  "제도",
+                  "가죽",
+                  "씨름",
+                  "전화",
+                  "라지오",
+                  "배구",
+                  "스케트",
+                  "포술",
+                  "항해",
+                  "륙상",
+                  "식료",
+                  "조각",
+                  "극",
+                  "지도",
+                  "탁구",
+                  "계기",
+                  "교통",
+                  "동식물",
+                  "련금술",
+                  "채광",
+                  "력기",
+                  "방적",
+                  "사격",
+                  "약제",
+                  "돈찍기",
+                  "발생",
+                  "어업",
+                  "태권도",
+                  "선박",
+                  "교예",
+                  "공업",
+                  "군",
+                  "음",
+                  "예",
+                  "화",
+                  "공예",
+                  "기계공학",
+                  "농",
+                  "물리학",
+                  "배",
+                  "부기",
+                  "수",
+                  "수문",
+                  "심리학",
+                  "약",
+                  "양",
+                  "양봉",
+                  "잠업",
+                  "장",
+                  "재봉",
+                  "지구",
+                  "천",
+                  "천문학",
+                  "해"
+            ],
+            "styles": [
+                  "준말",
+                  "말",
+                  "속",
+                  "옛",
+                  "방언",
+                  "버림",
+                  "드뭄",
+                  "글",
+                  "우스개",
+                  "멸시",
+                  "속용",
+                  "속담",
+                  "비어",
+                  "에두름",
+                  "비유",
+                  "고어",
+                  "회화",
+                  "사",
+                  "은"
+            ]
+      },
+      "ko_ko": {
+            "domains": [
+                  "화학",
+                  "의학",
+                  "물리",
+                  "생물",
+                  "건설",
+                  "기계",
+                  "경제",
+                  "언어",
+                  "음악",
+                  "수학",
+                  "금속",
+                  "지질",
+                  "전기",
+                  "체육",
+                  "생리",
+                  "농학",
+                  "지리",
+                  "정보",
+                  "약학",
+                  "법률",
+                  "운수",
+                  "전자",
+                  "광업",
+                  "방직",
+                  "력사",
+                  "고고",
+                  "미술",
+                  "체신",
+                  "축산",
+                  "천문",
+                  "해양",
+                  "민속",
+                  "수산",
+                  "수리",
+                  "기상",
+                  "출판",
+                  "림학",
+                  "철학",
+                  "영화",
+                  "화학공업",
+                  "자동화",
+                  "문학",
+                  "잠학",
+                  "무용",
+                  "문예",
+                  "교육",
+                  "론리",
+                  "연극",
+                  "심리",
+                  "인쇄",
+                  "력학",
+                  "교예",
+                  "농업",
+                  "천체",
+                  "식물",
+                  "림업",
+                  "선박",
+                  "종교",
+                  "건축",
+                  "광학",
+                  "예술",
+                  "잠업",
+                  "공예",
+                  "군사",
+                  "동물",
+                  "륜리",
+                  "무역",
+                  "해운",
+                  "공업",
+                  "광물",
+                  "수의",
+                  "통신"
+            ],
+            "styles": [
+                  "방언",
+                  "고어",
+                  "반말"
+            ]
+      },
+      "ko_ru": {
+            "domains": [
+                  "의",
+                  "식",
+                  "물리",
+                  "화",
+                  "전",
+                  "화학",
+                  "의학",
+                  "지질",
+                  "생물",
+                  "공학",
+                  "언",
+                  "생",
+                  "동물",
+                  "전기",
+                  "수학",
+                  "종",
+                  "력사",
+                  "생리",
+                  "기계",
+                  "음악",
+                  "해양",
+                  "음",
+                  "경제",
+                  "언어",
+                  "농",
+                  "수",
+                  "건설",
+                  "해",
+                  "체육",
+                  "광",
+                  "군사",
+                  "천문",
+                  "금속",
+                  "지리",
+                  "농업",
+                  "철",
+                  "체",
+                  "건",
+                  "문",
+                  "법학",
+                  "천",
+                  "광업",
+                  "곤",
+                  "시",
+                  "법",
+                  "운수",
+                  "인",
+                  "기상",
+                  "민속",
+                  "력",
+                  "미술",
+                  "수산",
+                  "항",
+                  "경",
+                  "철학",
+                  "군",
+                  "림학",
+                  "배",
+                  "문학",
+                  "상업",
+                  "광물",
+                  "사냥",
+                  "고고",
+                  "종교",
+                  "식물",
+                  "출판",
+                  "공",
+                  "재",
+                  "축산",
+                  "문예",
+                  "연",
+                  "론리",
+                  "미",
+                  "예",
+                  "론",
+                  "심",
+                  "사진",
+                  "수의",
+                  "전자",
+                  "잠학",
+                  "무용",
+                  "인쇄",
+                  "영화",
+                  "연극",
+                  "영",
+                  "교육",
+                  "광학",
+                  "양",
+                  "심리",
+                  "건축",
+                  "재봉",
+                  "금",
+                  "야금",
+                  "외",
+                  "약",
+                  "인류",
+                  "세",
+                  "수리",
+                  "수사",
+                  "약학",
+                  "장",
+                  "교예",
+                  "교통",
+                  "재정",
+                  "림업",
+                  "방직",
+                  "섬유",
+                  "정보",
+                  "항공",
+                  "곤충",
+                  "지물",
+                  "교",
+                  "수공",
+                  "수문",
+                  "체신",
+                  "력학",
+                  "법률",
+                  "선",
+                  "선박",
+                  "의성",
+                  "콤퓨터",
+                  "해부",
+                  "극",
+                  "농약",
+                  "자동차",
+                  "회계",
+                  "교회",
+                  "로동",
+                  "무선",
+                  "무역",
+                  "암석",
+                  "자기",
+                  "정치",
+                  "제도",
+                  "지구",
+                  "측량",
+                  "가구",
+                  "가죽",
+                  "경영",
+                  "광산",
+                  "금융",
+                  "도서관",
+                  "도이취",
+                  "라지오",
+                  "라틴",
+                  "로케트",
+                  "면역",
+                  "문법",
+                  "물고기",
+                  "미신",
+                  "발생",
+                  "병리",
+                  "불교",
+                  "사격",
+                  "생태",
+                  "세균",
+                  "세포",
+                  "수영",
+                  "식료",
+                  "어류",
+                  "예술",
+                  "우주",
+                  "음향",
+                  "잠업",
+                  "지도",
+                  "지진",
+                  "체조",
+                  "축구",
+                  "토목",
+                  "활자"
+            ],
+            "styles": [
+                  "말",
+                  "속",
+                  "낡",
+                  "방언",
+                  "글",
+                  "은",
+                  "롱",
+                  "민",
+                  "상",
+                  "야",
+                  "높",
+                  "멸",
+                  "욕",
+                  "불",
+                  "사",
+                  "속담",
+                  "홀",
+                  "전문",
+                  "친",
+                  "회",
+                  "직",
+                  "직업",
+                  "회화",
+                  "공식"
+            ]
+      }
+};
+
+    const DPRK_INITIAL_ORDER = ['ㄱ','ㄴ','ㄷ','ㄹ','ㅁ','ㅂ','ㅅ','ㆁ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ','ㄲ','ㄸ','ㅃ','ㅆ','ㅉ','ㅇ'];
+    const DPRK_VOWEL_ORDER = ['ㅏ','ㅑ','ㅓ','ㅕ','ㅗ','ㅛ','ㅜ','ㅠ','ㅡ','ㅣ','ㅐ','ㅒ','ㅔ','ㅖ','ㅚ','ㅟ','ㅢ','ㅘ','ㅝ','ㅙ','ㅞ'];
+    const HANGUL_L = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+    const HANGUL_V = ['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'];
+    const HANGUL_T = ['', 'ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+    const DPRK_INITIAL_RANK = Object.fromEntries(DPRK_INITIAL_ORDER.map((x,i)=>[x,i]));
+    const DPRK_VOWEL_RANK = Object.fromEntries(DPRK_VOWEL_ORDER.map((x,i)=>[x,i]));
+    function dprkCharKey(ch){
+      const cp = ch.codePointAt(0);
+      if(cp >= 0xAC00 && cp <= 0xD7A3){
+        const n = cp - 0xAC00, l = Math.floor(n / 588), v = Math.floor((n % 588) / 28), t = n % 28;
+        const L = HANGUL_L[l], V = HANGUL_V[v], T = HANGUL_T[t] || '';
+        return [0, DPRK_INITIAL_RANK[L] ?? 999, DPRK_VOWEL_RANK[V] ?? 999, T ? (DPRK_INITIAL_RANK[T[0]] ?? 999) : -1, ch];
+      }
+      if(DPRK_INITIAL_RANK[ch] !== undefined) return [0, DPRK_INITIAL_RANK[ch], -1, -1, ch];
+      if(DPRK_VOWEL_RANK[ch] !== undefined) return [1, DPRK_VOWEL_RANK[ch], -1, -1, ch];
+      return [2, ch.toLocaleLowerCase('ko-KP'), -1, -1, ch];
+    }
+    function cmpKeyArray(a,b){
+      const len=Math.max(a.length,b.length);
+      for(let i=0;i<len;i++){
+        if(i>=a.length) return -1;
+        if(i>=b.length) return 1;
+        const x=a[i], y=b[i];
+        const m=Math.max(x.length,y.length);
+        for(let j=0;j<m;j++){
+          const xv=x[j], yv=y[j];
+          if(xv===undefined) return -1;
+          if(yv===undefined) return 1;
+          if(xv<yv) return -1;
+          if(xv>yv) return 1;
+        }
+      }
+      return 0;
+    }
+    function dprkSortText(v){
+      return String(v ?? '').normalize('NFKC').replace(/[\u200B-\u200D\uFEFF]/g,'').replace(/\s+/g,' ').trim();
+    }
+    function dprkCompare(a,b){
+      const ak=Array.from(dprkSortText(a)).map(dprkCharKey);
+      const bk=Array.from(dprkSortText(b)).map(dprkCharKey);
+      const c=cmpKeyArray(ak,bk);
+      return c || String(a).localeCompare(String(b),'ko-KP');
+    }
+    function sortDictLabels(){
+      for(const item of Object.values(DICT_LABELS)){
+        if(item.domains) item.domains=[...new Set(item.domains)].sort(dprkCompare);
+        if(item.styles) item.styles=[...new Set(item.styles)].sort(dprkCompare);
+      }
+    }
+    sortDictLabels();
+
+    const state = {
+      SQL:null, allEntries:[], slots:{ko_ru:null,biyak:null,ko_en:null,ko_ko:null}, vector:null,
+      northSouth:{northToSouth:new Map(), rows:0, pairs:0, names:[]}, settings:{showSouth:true,showNearby:true},
+      selectedDict:'all', labelFilter:null, marksPanelOpen:false, currentTasks:[], loadedRows:[], loading:false, currentPage:1,
+      nearbyResults:[], nearbyShown:5, nearbyTimer:null, nearbyMode:'idle', nearbyJob:0, nearbyLastTerm:'',
+      vectorCache:{status:'idle', words:[], vectors:[], map:new Map(), looseMap:new Map(), sorted:[], sortedLoose:[], dims:0, builtFor:null, progress:0, error:''}
+    };
+    const els = {};
+    const $ = id => document.getElementById(id);
+    function initEls(){['gate','main','gateZip','gateStatus','zipInput','clearBtn','sideStatus','slots','dictTabs','marksBar','marksPanel','searchInput','searchBtn','searchScope','searchMode','pageSize','nearbyBox','nearbyStatus','nearbyChips','nearbyCalc','nearbyMore','resultsHint','loadMoreBtn','autoLoadBtn','resultsMeta','resultsEmpty','resultsWrap','resultsBody','pager','pageInfo','pageBtns','globalStatus','globalStatusDot','drawer','drawerOverlay','drawerToggle','drawerClose','southToggle','nearbyToggle'].forEach(id=>els[id]=$(id));}
+    const delay = ms => new Promise(r=>setTimeout(r,ms));
+    const baseName = p => String(p||'').split(/[\\/]/).pop();
+    const noExt = p => baseName(p).replace(/\.[^.]+$/,'');
+    const escapeHtml = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const normalizeName = s => String(s||'').toLowerCase().normalize('NFKC').replace(/[\s_\-.()[\]{}]+/g,'');
+    const termKey = s => String(s ?? '').normalize('NFKC').replace(/[\u200B-\u200D\uFEFF]/g,'').replace(/\s+/g,' ').trim();
+    function setStatus(msg, kind='info'){
+      if(els.globalStatus) els.globalStatus.textContent = msg;
+      if(els.sideStatus) els.sideStatus.textContent = msg;
+      if(els.gateStatus) els.gateStatus.textContent = msg;
+      if(els.globalStatusDot){els.globalStatusDot.style.color = kind==='bad'?'var(--bad)':kind==='warn'?'var(--warn)':kind==='ok'?'var(--ok)':'var(--accent)';}
+    }
+    function isDbName(path){return /\.(db|sqlite|sqlite3)$/i.test(baseName(path));}
+    function isCsvName(path){return /\.csv$/i.test(baseName(path));}
+    function isSQLiteBytes(bytes){ if(!bytes || bytes.length < 16) return false; return new TextDecoder('ascii').decode(bytes.slice(0,16)) === 'SQLite format 3\0'; }
+    function decodeUtf8(bytes){ return new TextDecoder('utf-8').decode(bytes); }
+
+    function parseCSV(text){
+      text = String(text||'').replace(/^\uFEFF/, '');
+      const rows=[]; let row=[], cell='', q=false;
+      for(let i=0;i<text.length;i++){
+        const ch=text[i], next=text[i+1];
+        if(q){ if(ch==='"' && next==='"'){cell+='"'; i++;} else if(ch==='"'){q=false;} else cell+=ch; }
+        else { if(ch==='"') q=true; else if(ch===','){row.push(cell); cell='';} else if(ch==='\n'){row.push(cell); rows.push(row); row=[]; cell='';} else if(ch==='\r'){} else cell+=ch; }
+      }
+      if(cell.length || row.length){ row.push(cell); rows.push(row); }
+      return rows.filter(r => r.some(c => String(c||'').trim() !== ''));
+    }
+    function resetNorthSouth(){ state.northSouth={northToSouth:new Map(), rows:0, pairs:0, names:[]}; }
+    function addSouthPair(north, south){
+      north=termKey(north); south=termKey(south);
+      if(!north || !south || north===south) return false;
+      if(south.length > 80 || /북한어 문법에서|^\d+$/.test(south)) return false;
+      const k=termKey(north);
+      if(!state.northSouth.northToSouth.has(k)) state.northSouth.northToSouth.set(k,new Set());
+      state.northSouth.northToSouth.get(k).add(south);
+      return true;
+    }
+    function loadNorthSouthCsvText(name, text){
+      const rows=parseCSV(text);
+      if(!rows.length) return {pairs:0, rows:0};
+      const header=rows[0].map(h=>termKey(h).toLowerCase());
+      const northIdx=header.findIndex(h => h==='north' || h==='북한말' || h==='북한' || h.includes('north'));
+      const southIdx=header.findIndex(h => h==='south' || h==='남한말' || h==='남한' || h.includes('south'));
+      if(northIdx<0 || southIdx<0) return {pairs:0, rows:rows.length-1};
+      let added=0;
+      for(const row of rows.slice(1)) if(addSouthPair(row[northIdx], row[southIdx])) added++;
+      if(added){ state.northSouth.rows += rows.length-1; state.northSouth.pairs += added; state.northSouth.names.push(baseName(name)); }
+      return {pairs:added, rows:rows.length-1};
+    }
+    function southMatches(row){
+      const head = getHeadword(row);
+      const set = state.northSouth.northToSouth.get(termKey(head));
+      return set ? [...set] : [];
+    }
+    function southBadges(row){
+      if(!state.settings.showSouth || !state.northSouth.pairs) return '';
+      const vals=southMatches(row);
+      if(!vals.length) return '';
+      return `<div class="nsBadges">${vals.slice(0,8).map(v=>`<span class="nsBadge dblSearch" title="двойной клик — искать" data-search-term="${escapeHtml(v)}">Юг: <b>${escapeHtml(v)}</b></span>`).join('')}</div>`;
+    }
+
+    function quoteIdent(name){return '"'+String(name).replace(/"/g,'""')+'"';}
+    function runObjects(db, sql, params={}){
+      const stmt=db.prepare(sql); stmt.bind(params); const out=[];
+      try{ while(stmt.step()) out.push(stmt.getAsObject()); } finally { stmt.free(); }
+      return out;
+    }
+    async function ensureSQL(){
+      if(state.SQL) return state.SQL;
+      if(typeof initSqlJs !== 'function') throw new Error('sql.js не загрузился. Нужен интернет/CDN или локальный sql-wasm.');
+      state.SQL = await initSqlJs({ locateFile: file => `https://cdn.jsdelivr.net/npm/sql.js@1.10.3/dist/${file}` });
+      return state.SQL;
+    }
+    function getTables(db){return runObjects(db,`SELECT name FROM sqlite_schema WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name`).map(r=>r.name);}
+    function getColumns(db, table){return runObjects(db,`PRAGMA table_info(${quoteIdent(table)})`).map(c=>({name:c.name,type:String(c.type||'')}));}
+    function chooseMainTable(db){
+      const tables=getTables(db); if(!tables.length) return null;
+      if(tables.length===1) return tables[0];
+      const preferred=tables.find(t=>/entry|dict|word|main|terms?/i.test(t));
+      return preferred || tables[0];
+    }
+    function inspectDb(db){
+      const table=chooseMainTable(db);
+      if(!table) throw new Error('в DB нет пользовательских таблиц');
+      return { table, columns:getColumns(db,table) };
+    }
+    function searchableColumns(entry){
+      const cols=entry.columns||[];
+      const textish=cols.filter(c => !/(blob|binary)/i.test(c.type)).map(c=>c.name);
+      return textish.length ? textish : cols.map(c=>c.name);
+    }
+    function getHeadCol(entry){
+      const names=entry.columns.map(c=>c.name); const lower=Object.fromEntries(names.map(n=>[n.toLowerCase(),n]));
+      return lower.word || lower.headword || lower.head || lower.term || lower.lemma || lower.title || lower.key || names[0];
+    }
+    function getHeadword(row){
+      const keys=Object.keys(row||{}); if(!keys.length) return '';
+      const lower=Object.fromEntries(keys.map(k=>[k.toLowerCase(),k]));
+      const k=lower.word || lower.headword || lower.head || lower.term || lower.lemma || lower.title || lower.key || keys[0];
+      return termKey(row[k]);
+    }
+    function getDefinitionParts(row){
+      const keys=Object.keys(row||{}); if(!keys.length) return [];
+      const headKey=(Object.fromEntries(keys.map(k=>[k.toLowerCase(),k])).word || Object.fromEntries(keys.map(k=>[k.toLowerCase(),k])).headword || Object.fromEntries(keys.map(k=>[k.toLowerCase(),k])).head || Object.fromEntries(keys.map(k=>[k.toLowerCase(),k])).term || Object.fromEntries(keys.map(k=>[k.toLowerCase(),k])).lemma || Object.fromEntries(keys.map(k=>[k.toLowerCase(),k])).title || Object.fromEntries(keys.map(k=>[k.toLowerCase(),k])).key || keys[0]);
+      return keys.filter(k=>k!==headKey).map(k=>row[k]).filter(v=>v!==null && v!==undefined && String(v).trim()!=='' && String(v).trim()!==String(row[headKey]).trim()).map(v=>String(v));
+    }
+
+    function detectVectorSchema(entry){
+      const tables = entry?.db ? getTables(entry.db) : (entry.table ? [entry.table] : []);
+      let bestWide = null;
+      for (const table of tables) {
+        const cols = getColumns(entry.db, table);
+        const names = cols.map(c=>c.name);
+        const lower = Object.fromEntries(names.map(n=>[n.toLowerCase(),n]));
+        const wordCol = ['word','term','token','lemma','headword','head','key'].map(x=>lower[x]).find(Boolean)
+          || cols.find(c=>/^(word|token|term|lemma|head|key)$/i.test(c.name))?.name
+          || cols.find(c=>/(word|token|term|lemma|head|key|ko|kor|korean|hangul|표제|단어|어휘)/i.test(c.name))?.name;
+        const vectorCol = ['vector','vec','embedding','embeddings','weights','values'].map(x=>lower[x]).find(Boolean)
+          || cols.find(c=>/(^vec$|vector|embed|embedding|weights|values)/i.test(c.name))?.name;
+        const neighborCol = ['neighbor','similar','related','target','nearby'].map(x=>lower[x]).find(Boolean)
+          || cols.find(c=>/(neighbor|similar|related|target|nearby)/i.test(c.name))?.name;
+        const scoreCol = ['score','similarity','sim','weight','cosine'].map(x=>lower[x]).find(Boolean)
+          || cols.find(c=>/(score|similarity|sim|weight|cosine|cos)/i.test(c.name))?.name;
+        if (wordCol && vectorCol) return {mode:'vectors', table, wordCol, vectorCol};
+        if (wordCol && neighborCol) return {mode:'neighbors', table, wordCol, neighborCol, scoreCol};
+
+        // Wide vector table: one word/token column + many numeric dimension columns.
+        // Typical names: d0..d199, dim_0..dim_199, v1..v200, x0..x199, or just many REAL columns.
+        if (wordCol) {
+          const dimCols = cols
+            .filter(c => c.name !== wordCol)
+            .filter(c => /^(d|dim|v|x|c|f)[_]?\d+$/i.test(c.name) || /^(real|float|double|numeric|decimal|integer|int)$/i.test(String(c.type||'')))
+            .map(c=>c.name);
+          if (dimCols.length >= 8 && (!bestWide || dimCols.length > bestWide.dimCols.length)) {
+            bestWide = {mode:'wide', table, wordCol, dimCols};
+          }
+        }
+      }
+      return bestWide;
+    }
+    function autoAssign(entry){
+      const n=normalizeName(baseName(entry.name));
+      if(/vector|vectors|vec|embedding|embeddings|similar|near|nk200|sg7/.test(n) || detectVectorSchema(entry)) return 'vector';
+      if(n.includes('krrk')) return 'ko_ru';
+      if(n.includes('biyak') || n.includes('비약')) return 'biyak';
+      if(n.includes('keek')) return 'ko_en';
+      if(n==='kk' || n.startsWith('kk')) return 'ko_ko';
+      return 'ignore';
+    }
+    function applyAssignment(entry,target){
+      entry.assignedTo=target;
+      if(target==='vector'){
+        entry.vectorSchema=detectVectorSchema(entry);
+        state.vector=entry;
+        resetVectorCache();
+        if(entry.vectorSchema && entry.vectorSchema.mode!=='neighbors') setTimeout(buildVectorIndexBackground, 30);
+      }
+      else if(state.slots.hasOwnProperty(target)){state.slots[target]=entry;}
+      renderSlots(); renderDictTabs(); rebuildColumnFilter(); updateNearbyDebounced();
+    }
+    async function loadDbFromBytes(name, bytes){
+      if(!isSQLiteBytes(bytes)) throw new Error(`${baseName(name)} не SQLite: нет заголовка SQLite format 3`);
+      const SQL=await ensureSQL(); let db;
+      try{ db=new SQL.Database(bytes); const inspected=inspectDb(db); const entry={id:(crypto.randomUUID?crypto.randomUUID():String(Date.now()+Math.random())),name,db,...inspected,assignedTo:'ignore',vectorSchema:null}; state.allEntries.push(entry); applyAssignment(entry,autoAssign(entry)); return entry; }
+      catch(e){try{if(db)db.close()}catch{}; throw new Error(`${baseName(name)} не открылась как SQLite: ${e.message}`);}
+    }
+    async function unzipBytes(zipBytes){
+      if(typeof fflate==='undefined' || typeof fflate.unzip!=='function') throw new Error('fflate не загрузился. Нужен интернет/CDN или локальная библиотека.');
+      return await new Promise((resolve,reject)=>fflate.unzip(zipBytes,(err,data)=>err?reject(err):resolve(data)));
+    }
+    async function handleZipFile(file){
+      if(!file) return;
+      clearDatabasesOnly();
+      setStatus(`читаю ZIP: ${file.name}…`);
+      const zipBytes=new Uint8Array(await file.arrayBuffer()); const unzipped=await unzipBytes(zipBytes);
+      const csvEntries=Object.entries(unzipped).filter(([name,bytes])=>bytes&&bytes.length&&isCsvName(name));
+      let csvLoaded=0;
+      for(const [name,bytes] of csvEntries){
+        const nice=baseName(name);
+        // Новый формат: north,south,source,domain. Старый 용어/설명 намеренно не парсим.
+        if(!/north|south|남북|비교|merged|clean|pigyo|pigo/i.test(nice) && csvEntries.length>1) continue;
+        const res=loadNorthSouthCsvText(nice, decodeUtf8(bytes));
+        if(res.pairs>0) csvLoaded++;
+      }
+      const dbEntries=Object.entries(unzipped).filter(([name,bytes])=>bytes&&bytes.length&&isDbName(name));
+      if(!dbEntries.length) throw new Error('В ZIP не найдено .db / .sqlite / .sqlite3.');
+      let count=0, skipped=[];
+      for(const [name,bytes] of dbEntries){
+        const nice=baseName(name);
+        if(!isSQLiteBytes(bytes)){skipped.push(`${nice}: не SQLite`); continue;}
+        setStatus(`открываю ${nice}…`);
+        try{await loadDbFromBytes(nice,bytes); count++;}catch(e){skipped.push(e.message)}
+        await delay(0);
+      }
+      if(!count) throw new Error('В ZIP не удалось открыть ни одной SQLite DB.' + (skipped.length?'\n'+skipped.join('\n'):''));
+      showMain(); renderSlots(); renderDictTabs(); rebuildColumnFilter();
+      const missing=DICT_SLOTS.filter(s=>!state.slots[s.key]).map(s=>s.label);
+      let msg=`DB: ${count}, соответствия Юг: ${state.northSouth.pairs || 0}`;
+      if(missing.length) msg += `, пусто: ${missing.join(', ')}`;
+      if(skipped.length) msg += `, пропущено: ${skipped.length}`;
+      await runSearch();
+      setStatus(msg, missing.length||skipped.length?'warn':'ok');
+    }
+    function showMain(){els.gate.hidden=true; els.main.hidden=false;}
+    function clearDatabasesOnly(){
+      for(const e of state.allEntries){try{e.db.close()}catch{}}
+      state.allEntries=[]; state.slots={ko_ru:null,biyak:null,ko_en:null,ko_ko:null}; state.vector=null; resetNorthSouth();
+      state.currentTasks=[]; state.loadedRows=[]; state.nearbyResults=[]; state.currentPage=1; resetVectorCache();
+      renderSlots(); renderDictTabs(); rebuildColumnFilter(); renderResults(); renderNearby();
+    }
+    function clearAll(){clearDatabasesOnly(); setStatus('очищено','warn'); els.gate.hidden=false; els.main.hidden=true;}
+    function renderSlots(){
+      if(!els.slots) return; els.slots.innerHTML='';
+      for(const slot of DICT_SLOTS){const e=state.slots[slot.key]; const d=document.createElement('div'); d.className='slot'+(e?' loaded':''); d.innerHTML=`<div class="slotTop"><span class="slotName">${escapeHtml(slot.label)}</span><span class="slotState">${e?'загружен':'пусто'}</span></div><div class="slotFile">${e?escapeHtml(baseName(e.name)): 'ждёт файл в ZIP'}</div>`; els.slots.appendChild(d);}
+      const v=state.vector; const vd=document.createElement('div'); vd.className='slot vector'+(v?' loaded':'');
+      const schemaInfo = v?.vectorSchema ? ` · ${escapeHtml(v.vectorSchema.table)} · ${escapeHtml(v.vectorSchema.mode)}${v.vectorSchema.dimCols?` ${v.vectorSchema.dimCols.length}d`:''} · ${escapeHtml(vectorCacheLabel())}` : ' · схема не распознана';
+      vd.innerHTML=`<div class="slotTop"><span class="slotName">векторная DB</span><span class="slotState">${v?'загружена':'пусто'}</span></div><div class="slotFile">${v?escapeHtml(baseName(v.name))+schemaInfo:'для векторных соответствий'}</div>`; els.slots.appendChild(vd);
+      const ns=state.northSouth; const nd=document.createElement('div'); nd.className='slot'+(ns.pairs?' loaded':''); nd.innerHTML=`<div class="slotTop"><span class="slotName">Юг/Север</span><span class="slotState">${ns.pairs?'загружено':'пусто'}</span></div><div class="slotFile">${ns.pairs?`пар: ${ns.pairs} · ${escapeHtml(ns.names.join(', '))}`:'north_south_merged_clean.csv внутри ZIP'}</div>`; els.slots.appendChild(nd);
+    }
+    function renderDictTabs(){
+      const tabs=[{key:'all',label:'все словари'}].concat(DICT_SLOTS.map(s=>({key:s.key,label:s.label})));
+      els.dictTabs.innerHTML='';
+      for(const tab of tabs){const loaded=tab.key==='all'?Object.values(state.slots).some(Boolean):!!state.slots[tab.key]; const b=document.createElement('button'); b.className='tab'+(state.selectedDict===tab.key?' active':''); b.textContent=tab.label+(loaded?'':' · пусто'); b.onclick=()=>{state.selectedDict=tab.key; state.currentPage=1; if(state.labelFilter && state.labelFilter.dict!==tab.key) state.labelFilter=null; state.marksPanelOpen=false; renderDictTabs(); renderMarksUi(); rebuildColumnFilter(); runSearch();}; els.dictTabs.appendChild(b);}
+      renderMarksUi();
+    }
+    function selectedEntries(){
+      if(state.selectedDict==='all') return DICT_SLOTS.map(s=>({slot:s,entry:state.slots[s.key]})).filter(x=>x.entry);
+      const slot=DICT_SLOTS.find(s=>s.key===state.selectedDict); const entry=slot?state.slots[slot.key]:null; return entry?[{slot,entry}]:[];
+    }
+    function labelDataForSelected(){ return DICT_LABELS[state.selectedDict] || {domains:[],styles:[]}; }
+    function clearLabelFilter(run=true){ state.labelFilter=null; renderMarksUi(); if(run) runSearch(); }
+    function setLabelFilter(kind,value){
+      if(state.selectedDict==='all') return;
+      state.labelFilter={dict:state.selectedDict, kind, value};
+      renderMarksUi(); runSearch();
+    }
+    function renderMarksUi(){
+      const slot=DICT_SLOTS.find(s=>s.key===state.selectedDict);
+      const can=!!slot;
+      els.marksBar.hidden=!can;
+      els.marksPanel.hidden=!(can && state.marksPanelOpen);
+      if(!can){ state.marksPanelOpen=false; state.labelFilter=null; return; }
+      const active=state.labelFilter && state.labelFilter.dict===state.selectedDict ? state.labelFilter : null;
+      els.marksBar.innerHTML=`<button type="button" class="marksBtn" id="marksOpenBtn">пометы</button>${active?`<span class="activeFilter">${active.kind==='domain'?'область':'стиль'}: <b>${escapeHtml(active.value)}</b><button type="button" title="сбросить" id="clearLabelBtn">×</button></span>`:''}`;
+      const openBtn=document.getElementById('marksOpenBtn'); if(openBtn) openBtn.onclick=()=>{state.marksPanelOpen=!state.marksPanelOpen; renderMarksUi();};
+      const clearBtn=document.getElementById('clearLabelBtn'); if(clearBtn) clearBtn.onclick=()=>clearLabelFilter(true);
+      if(!state.marksPanelOpen) return;
+      const data=labelDataForSelected();
+      const renderGroup=(title,kind,items)=> items&&items.length ? `<div class="marksGroup"><div class="marksGroupTitle">${title}</div><div class="markChips">${items.map(x=>`<button type="button" class="markChip ${active&&active.kind===kind&&active.value===x?'active':''}" data-kind="${kind}" data-value="${escapeHtml(x)}">${escapeHtml(x)}</button>`).join('')}</div></div>` : '';
+      els.marksPanel.innerHTML=`<div class="marksPanelHead"><div class="marksPanelTitle">Пометы · ${escapeHtml(slot.label)}</div><button type="button" class="marksClose" id="marksCloseBtn">×</button></div>${renderGroup('области', 'domain', data.domains)}${renderGroup('стилистические', 'style', data.styles)}${(!data.domains.length&&!data.styles.length)?'<div class="note">Для этого словаря список помет пуст.</div>':''}`;
+      const close=document.getElementById('marksCloseBtn'); if(close) close.onclick=()=>{state.marksPanelOpen=false; renderMarksUi();};
+      els.marksPanel.querySelectorAll('.markChip').forEach(btn=>btn.onclick=()=>setLabelFilter(btn.dataset.kind, btn.dataset.value));
+    }
+    function regexEscape(s){return String(s).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');}
+    function labelPattern(slotKey, value){
+      const core=regexEscape(termKey(value)).replace(/\s+/g,'\\s+');
+      if(slotKey==='biyak') return new RegExp(`[(（]\\s*${core}\\s*[)）]`,'u');
+      return new RegExp(`(?:《\\s*${core}\\s*》|〈\\s*${core}\\s*〉|«\\s*${core}\\s*»|<\\s*${core}\\s*>|\\[\\s*${core}\\s*\\])`,'u');
+    }
+    function rowText(row){ return Object.values(row||{}).filter(v=>v!==null&&v!==undefined).map(v=>String(v)).join('\n'); }
+    function rowPassesLabel(item){
+      const f=state.labelFilter;
+      if(!f) return true;
+      if(item.slot.key!==f.dict) return false;
+      return labelPattern(item.slot.key, f.value).test(rowText(item.row));
+    }
+    function rebuildColumnFilter(){ /* выбор таблиц/колонок убран: область поиска задаётся searchScope */ }
+    function likeEscape(s){return String(s).replace(/[\\%_]/g,m=>'\\'+m);}
+    function getContentColumns(entry){
+      const head=getHeadCol(entry);
+      const cols=searchableColumns(entry).filter(c=>c!==head);
+      return cols.length ? cols : searchableColumns(entry);
+    }
+    function columnsForSearchScope(entry){
+      const scope=els.searchScope?.value || 'head';
+      if(scope==='head') return [getHeadCol(entry)].filter(Boolean);
+      if(scope==='content') return getContentColumns(entry);
+      return searchableColumns(entry);
+    }
+    function buildWhere(cols, q, mode){
+      if(!q) return {whereSql:'',params:{}};
+      const params={}; let exprs=[];
+      cols.forEach((c,i)=>{ const p='$q'+i; if(mode==='exact'){exprs.push(`${quoteIdent(c)} = ${p}`); params[p]=q;} else {exprs.push(`${quoteIdent(c)} LIKE ${p} ESCAPE '\\'`); const esc=likeEscape(q); params[p]=mode==='starts'?esc+'%':mode==='ends'?'%'+esc:'%'+esc+'%';} });
+      return {whereSql:exprs.length?' WHERE '+exprs.join(' OR '):'', params};
+    }
+    function createTasks(){
+      const q=termKey(els.searchInput.value); const mode=els.searchMode.value; const tasks=[];
+      for(const {slot,entry} of selectedEntries()){
+        const cols=columnsForSearchScope(entry);
+        const {whereSql,params}=buildWhere(cols,q,mode);
+        tasks.push({slot,entry,cols,whereSql,params,offset:0,done:false});
+      }
+      return tasks;
+    }
+    function fetchTaskRows(task,limit){
+      const out=[];
+      const labelActive=!!state.labelFilter;
+      while(out.length<limit && !task.done){
+        const rawLimit = labelActive ? Math.max(250, Math.min(1200, (limit-out.length)*6)) : limit;
+        const sql=`SELECT * FROM ${quoteIdent(task.entry.table)}${task.whereSql} LIMIT $limit OFFSET $offset`;
+        const rows=runObjects(task.entry.db,sql,{...task.params,$limit:rawLimit,$offset:task.offset});
+        task.offset+=rows.length;
+        if(rows.length<rawLimit) task.done=true;
+        for(const row of rows){
+          const item={slot:task.slot,entry:task.entry,row};
+          if(rowPassesLabel(item)) out.push(item);
+          if(out.length>=limit) break;
+        }
+        if(!labelActive) break;
+        if(rows.length===0) break;
+        if(rows.length<rawLimit) break;
+      }
+      return out;
+    }
+    async function loadMoreResults(target){
+      if(state.loading) return; state.loading=true;
+      try{
+        let added=0;
+        while(added<target && state.currentTasks.some(t=>!t.done)){
+          for(const task of state.currentTasks.filter(t=>!t.done)){
+            const batch=Math.min(250,target-added); if(batch<=0) break;
+            const rows=fetchTaskRows(task,batch); state.loadedRows.push(...rows); added+=rows.length; await delay(0);
+          }
+          if(added===0) break;
+        }
+      } finally { state.loading=false; }
+    }
+    async function runSearch(){
+      state.currentPage=1; state.loadedRows=[]; state.currentTasks=createTasks();
+      els.resultsMeta.textContent='';
+      const hasQuery=!!els.searchInput.value.trim();
+      if(!state.currentTasks.length){ renderResults(); updateNearbyDebounced(); return; }
+      setStatus(hasQuery ? 'поиск…' : 'открываю начало словаря…');
+      await loadMoreResults(parseInt(els.pageSize.value,10)||300);
+      renderResults(); updateNearbyDebounced(); setStatus('готово','ok');
+    }
+    function shouldHighlightSearch(){
+      const scope=els.searchScope?.value || 'head';
+      return (scope==='content' || scope==='all') && !!termKey(els.searchInput.value);
+    }
+    function highlight(text){
+      text=escapeHtml(text); const q=termKey(els.searchInput.value); if(!q || !shouldHighlightSearch()) return text;
+      try{
+        const re=new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi');
+        return text.replace(re,m=>`<mark>${m}</mark>`);
+      }catch{return text;}
+    }
+    function highlightFor(text, place){
+      const scope=els.searchScope?.value || 'head';
+      if(place==='head' && scope!=='all') return escapeHtml(text);
+      if(place==='def' && !(scope==='content' || scope==='all')) return escapeHtml(text);
+      return highlight(text);
+    }
+    function renderArticle(item, showDict){
+      const head=getHeadword(item.row); const parts=getDefinitionParts(item.row); const def=parts.length?parts:[];
+      return `<div class="resultRow ${showDict?'':'noDict'}">${showDict?`<div class="resultDict">${escapeHtml(item.slot.label)}</div>`:''}<div class="dictArticle"><div class="articleHead dblSearch" title="двойной клик — искать" data-search-term="${escapeHtml(head)}">${highlightFor(head,'head')}</div>${southBadges(item.row)}<div class="articleDef">${def.map(x=>`<div>${highlightFor(x,'def')}</div>`).join('') || '<div class="note">без определения</div>'}</div></div></div>`;
+    }
+    function renderResults(){
+      const total=state.loadedRows.length; const pageSize=parseInt(els.pageSize.value,10)||300; const pages=Math.max(1,Math.ceil(total/pageSize)); if(state.currentPage>pages) state.currentPage=pages;
+      const start=(state.currentPage-1)*pageSize, end=start+pageSize; const pageRows=state.loadedRows.slice(start,end); const showDict=state.selectedDict==='all'; const more=state.currentTasks.some(t=>!t.done);
+      const hasQuery=!!els.searchInput.value.trim();
+      els.resultsHint.textContent=hasQuery?`${total}${more?'+':''}`:(total?`начало · ${total}${more?'+':''}`:'');
+      els.resultsMeta.textContent=total?`Показано ${start+1}–${Math.min(end,total)} из загруженных ${total}${more?' · есть ещё':''}`:'';
+      els.loadMoreBtn.hidden=!more; els.autoLoadBtn.hidden=!more;
+      if(!pageRows.length){els.resultsWrap.hidden=true; els.resultsEmpty.hidden=false; els.resultsEmpty.textContent=selectedEntries().length?(hasQuery?'Ничего не найдено.':'В выбранном словаре нет статей.'):'Загрузи ZIP-пакет.'; return;}
+      els.resultsEmpty.hidden=true; els.resultsWrap.hidden=false; els.resultsBody.innerHTML=pageRows.map(r=>renderArticle(r,showDict)).join('');
+      els.pageInfo.textContent=`страница ${state.currentPage} / ${pages}`; renderPageButtons(pages);
+    }
+    function renderPageButtons(pages){
+      els.pageBtns.innerHTML=''; if(pages<=1) return;
+      const nums=new Set([1,pages,state.currentPage,state.currentPage-1,state.currentPage+1]);
+      [...nums].filter(n=>n>=1&&n<=pages).sort((a,b)=>a-b).forEach(n=>{const b=document.createElement('button'); b.className='btn small'+(n===state.currentPage?' primary':''); b.textContent=n; b.onclick=()=>{state.currentPage=n; renderResults();}; els.pageBtns.appendChild(b);});
+    }
+    async function autoLoadAll(){
+      if(!state.currentTasks.some(t=>!t.done)) return; els.autoLoadBtn.disabled=true;
+      try{ while(state.currentTasks.some(t=>!t.done)){ await loadMoreResults(5000); renderResults(); } } finally { els.autoLoadBtn.disabled=false; renderResults(); }
+    }
+
+    function parseVector(v){
+      if(Array.isArray(v)) return v.map(Number).filter(Number.isFinite);
+      if(v instanceof Uint8Array || v instanceof ArrayBuffer){
+        const buf = v instanceof Uint8Array ? v.buffer.slice(v.byteOffset, v.byteOffset + v.byteLength) : v;
+        // SQLite BLOBs with Float32/Float64 vectors.
+        if(buf.byteLength % 4 === 0){
+          const arr = Array.from(new Float32Array(buf)).filter(Number.isFinite);
+          if(arr.length) return arr;
+        }
+        if(buf.byteLength % 8 === 0){
+          const arr = Array.from(new Float64Array(buf)).filter(Number.isFinite);
+          if(arr.length) return arr;
+        }
+        return null;
+      }
+      const s=String(v||'').trim(); if(!s) return null;
+      try{ const arr=JSON.parse(s); if(Array.isArray(arr)) return arr.map(Number).filter(Number.isFinite); }catch{}
+      const nums=s.split(/[\s,;|]+/).map(Number).filter(Number.isFinite);
+      return nums.length?nums:null;
+    }
+    function cosine(a,b){let dot=0,na=0,nb=0; const n=Math.min(a.length,b.length); for(let i=0;i<n;i++){dot+=a[i]*b[i];na+=a[i]*a[i];nb+=b[i]*b[i];} return na&&nb?dot/(Math.sqrt(na)*Math.sqrt(nb)):0;}
+    function rowToWideVector(row, cols){ return cols.map(c=>Number(row[c])).filter(Number.isFinite); }
+    function normalizeVector(vec){
+      let norm=0;
+      for(const x of vec) norm += x*x;
+      norm=Math.sqrt(norm);
+      if(!norm || !Number.isFinite(norm)) return null;
+      const out=new Float32Array(vec.length);
+      for(let i=0;i<vec.length;i++) out[i]=Number(vec[i])/norm;
+      return out;
+    }
+    function vectorKey(s){ return termKey(s).toLowerCase(); }
+    function vectorLooseKey(s){ return vectorKey(s).replace(/\s+/g,''); }
+    function prefixLookup(sorted, prefix){
+      if(!prefix || prefix.length < 2 || !sorted?.length) return -1;
+      let lo=0, hi=sorted.length;
+      while(lo<hi){ const mid=(lo+hi)>>1; if(sorted[mid].key < prefix) lo=mid+1; else hi=mid; }
+      return (lo<sorted.length && sorted[lo].key.startsWith(prefix)) ? sorted[lo].index : -1;
+    }
+    function resetVectorCache(){
+      state.vectorCache={status:'idle', words:[], vectors:[], map:new Map(), looseMap:new Map(), sorted:[], sortedLoose:[], dims:0, builtFor:null, progress:0, error:''};
+      state.nearbyJob++;
+    }
+    function vectorCacheLabel(){
+      const c=state.vectorCache;
+      if(!state.vector || !state.vector.vectorSchema) return 'схема не распознана';
+      const schema=state.vector.vectorSchema;
+      if(schema.mode==='neighbors') return 'готовая таблица соседей';
+      if(c.status==='ready') return `индекс готов · ${c.words.length} слов · ${c.dims}d`;
+      if(c.status==='building') return `строю индекс · ${c.progress} слов`;
+      if(c.status==='error') return `ошибка индекса: ${c.error}`;
+      return 'индекс ещё не готов';
+    }
+    async function buildVectorIndexBackground(){
+      const entry=state.vector, schema=entry?.vectorSchema;
+      if(!entry || !schema || schema.mode==='neighbors') return;
+      const cache=state.vectorCache;
+      if(cache.status==='building' || cache.status==='ready') return;
+      cache.status='building'; cache.words=[]; cache.vectors=[]; cache.map=new Map(); cache.dims=0; cache.progress=0; cache.error='';
+      renderSlots(); renderNearby();
+      await delay(0);
+      try{
+        let offset=0;
+        const chunk=schema.mode==='wide'?900:1200;
+        while(true){
+          let rows;
+          if(schema.mode==='wide'){
+            const selectDims=schema.dimCols.map(quoteIdent).join(', ');
+            rows=runObjects(entry.db,`SELECT ${quoteIdent(schema.wordCol)} AS w, ${selectDims} FROM ${quoteIdent(schema.table)} LIMIT $limit OFFSET $offset`,{$limit:chunk,$offset:offset});
+          }else{
+            rows=runObjects(entry.db,`SELECT ${quoteIdent(schema.wordCol)} AS w, ${quoteIdent(schema.vectorCol)} AS v FROM ${quoteIdent(schema.table)} LIMIT $limit OFFSET $offset`,{$limit:chunk,$offset:offset});
+          }
+          if(!rows.length) break;
+          for(const r of rows){
+            const w=termKey(r.w); if(!w) continue;
+            const raw=schema.mode==='wide'?rowToWideVector(r, schema.dimCols):parseVector(r.v);
+            if(!raw || raw.length<2) continue;
+            const vec=normalizeVector(raw); if(!vec) continue;
+            if(!cache.dims) cache.dims=vec.length;
+            // Держим одну размерность, иначе косинус по разным векторам бессмысленен.
+            if(vec.length!==cache.dims) continue;
+            const idx=cache.words.length;
+            cache.words.push(w); cache.vectors.push(vec);
+            const k=vectorKey(w), loose=vectorLooseKey(w);
+            if(!cache.map.has(k)) cache.map.set(k, idx);
+            if(loose && !cache.looseMap.has(loose)) cache.looseMap.set(loose, idx);
+          }
+          offset += rows.length;
+          cache.progress = cache.words.length;
+          if(rows.length < chunk) break;
+          if(offset % (chunk*4)===0){ renderSlots(); await delay(0); }
+        }
+        cache.sorted = cache.words.map((w,i)=>({key:vectorKey(w), index:i})).sort((a,b)=>a.key.localeCompare(b.key));
+        cache.sortedLoose = cache.words.map((w,i)=>({key:vectorLooseKey(w), index:i})).filter(x=>x.key).sort((a,b)=>a.key.localeCompare(b.key));
+        cache.status = cache.words.length ? 'ready' : 'empty';
+        cache.builtFor = entry.id;
+        renderSlots();
+        updateNearbyDebounced();
+      }catch(e){
+        console.warn(e);
+        cache.status='error'; cache.error=e?.message || String(e);
+        renderSlots(); renderNearby();
+      }
+    }
+
+    // Векторные соответствия: не трогаем тяжёлую DB на каждый ввод.
+    // 1) если есть готовая таблица соседей — быстрый SELECT.
+    // 2) если есть сырые векторы — один раз строим индекс при загрузке ZIP, потом считаем по памяти чанками с отменой старых задач.
+    function updateNearbyDebounced(){ clearTimeout(state.nearbyTimer); state.nearbyTimer=setTimeout(renderNearbyForQuery,220); }
+    function clearNearbySoft(){
+      clearTimeout(state.nearbyTimer);
+      state.nearbyResults=[]; state.nearbyShown=5; state.nearbyMode='idle'; state.nearbyLastTerm='';
+      renderNearby();
+    }
+    function renderNearbyForQuery(){
+      const word=termKey(els.searchInput.value); state.nearbyResults=[]; state.nearbyShown=5; state.nearbyLastTerm=word;
+      const job=++state.nearbyJob;
+      if(!state.settings.showNearby){ state.nearbyMode='off'; renderNearby(); return; }
+      if(!word){ state.nearbyMode='idle'; renderNearby(); return; }
+      if(!state.vector || !state.vector.vectorSchema){ state.nearbyMode='noschema'; renderNearby(); return; }
+      const schema=state.vector.vectorSchema;
+      if(schema.mode==='neighbors'){
+        try{ state.nearbyResults=findNearbyFast(word); state.nearbyMode=state.nearbyResults.length?'ready':'empty'; }
+        catch(e){ console.warn(e); state.nearbyResults=[]; state.nearbyMode='error'; }
+        renderNearby(); return;
+      }
+      if(state.vectorCache.status==='idle') buildVectorIndexBackground();
+      if(state.vectorCache.status==='building') { state.nearbyMode='indexing'; renderNearby(); return; }
+      if(state.vectorCache.status==='error') { state.nearbyMode='index_error'; renderNearby(); return; }
+      if(state.vectorCache.status!=='ready') { state.nearbyMode='empty'; renderNearby(); return; }
+      state.nearbyMode='working'; renderNearby();
+      // Даем браузеру сначала отрисовать ввод, потом считаем.
+      setTimeout(()=>computeNearbyFromCache(word, job), 0);
+    }
+    function findNearbyFast(word){
+      const entry=state.vector, schema=entry.vectorSchema; if(!schema || schema.mode!=='neighbors') return [];
+      const scoreExpr=schema.scoreCol?quoteIdent(schema.scoreCol):'1';
+      const selectSql=`SELECT ${quoteIdent(schema.neighborCol)} AS w, ${scoreExpr} AS score FROM ${quoteIdent(schema.table)} WHERE ${quoteIdent(schema.wordCol)} = $w ORDER BY ${scoreExpr} DESC LIMIT 80`;
+      let source=termKey(word);
+      let rows=runObjects(entry.db,selectSql,{$w:source});
+      if(!rows.length && source.length>=2){
+        const esc=likeEscape(source);
+        const cand=runObjects(entry.db,`SELECT ${quoteIdent(schema.wordCol)} AS source FROM ${quoteIdent(schema.table)} WHERE ${quoteIdent(schema.wordCol)} LIKE $p ESCAPE '\\' LIMIT 1`,{$p:esc+'%'});
+        if(cand.length && cand[0].source){
+          source=termKey(cand[0].source);
+          rows=runObjects(entry.db,selectSql,{$w:source});
+        }
+      }
+      return rows.map(r=>({word:String(r.w),score:Number(r.score)||0})).filter(r=>r.word && r.word!==source);
+    }
+    function findVectorIndexForWord(word){
+      const c=state.vectorCache; const key=vectorKey(word), loose=vectorLooseKey(word);
+      if(c.map.has(key)) return c.map.get(key);
+      if(loose && c.looseMap.has(loose)) return c.looseMap.get(loose);
+      const byPrefix=prefixLookup(c.sorted, key); if(byPrefix>=0) return byPrefix;
+      const byLoosePrefix=prefixLookup(c.sortedLoose, loose); if(byLoosePrefix>=0) return byLoosePrefix;
+      return -1;
+    }
+    async function computeNearbyFromCache(word, job){
+      const c=state.vectorCache;
+      if(job!==state.nearbyJob || c.status!=='ready') return;
+      const qIdx=findVectorIndexForWord(word);
+      if(qIdx<0){ if(job===state.nearbyJob){state.nearbyResults=[]; state.nearbyMode='empty'; renderNearby();} return; }
+      const q=c.vectors[qIdx];
+      const best=[]; let worst=Infinity, worstI=-1;
+      const limit=80;
+      for(let i=0;i<c.vectors.length;i++){
+        if(job!==state.nearbyJob) return;
+        if(i===qIdx) continue;
+        const v=c.vectors[i]; let score=0;
+        for(let d=0; d<q.length; d++) score += q[d]*v[d];
+        if(best.length<limit){
+          best.push({word:c.words[i], score});
+          if(score<worst){worst=score; worstI=best.length-1;}
+        }else if(score>worst){
+          best[worstI]={word:c.words[i], score};
+          worst=best[0].score; worstI=0;
+          for(let k=1;k<best.length;k++) if(best[k].score<worst){worst=best[k].score; worstI=k;}
+        }
+        if(i % 1800 === 0) await delay(0);
+      }
+      if(job!==state.nearbyJob) return;
+      state.nearbyResults=best.sort((a,b)=>b.score-a.score);
+      state.nearbyMode=state.nearbyResults.length?'ready':'empty';
+      renderNearby();
+    }
+    function renderNearby(){
+      if(!state.settings.showNearby){
+        els.nearbyBox.hidden=true; els.nearbyChips.innerHTML=''; els.nearbyMore.hidden=true; if(els.nearbyCalc) els.nearbyCalc.hidden=true; return;
+      }
+      const shown=state.nearbyResults.slice(0,state.nearbyShown);
+      const hasPanel = shown.length || ['noschema','indexing','index_error','working','error','empty'].includes(state.nearbyMode);
+      els.nearbyBox.hidden=!hasPanel;
+      const labels={
+        idle:'векторные соответствия',
+        noschema:'векторная схема не распознана',
+        indexing:'готовлю векторный индекс… ввод не блокируется',
+        index_error:'ошибка подготовки векторов',
+        working:'подбираю векторные соответствия…',
+        ready:'векторные соответствия',
+        empty:'векторные соответствия не найдены',
+        error:'ошибка векторного поиска'
+      };
+      els.nearbyStatus.textContent=labels[state.nearbyMode] || 'векторные соответствия';
+      els.nearbyChips.innerHTML=shown.map(r=>`<button type="button" class="chip" data-word="${escapeHtml(r.word)}">${escapeHtml(r.word)}<span class="score">${Number(r.score).toFixed(3)}</span></button>`).join('');
+      els.nearbyChips.querySelectorAll('.chip').forEach(chip=>chip.onclick=()=>{els.searchInput.value=chip.dataset.word; state.nearbyShown=5; updateNearbyDebounced(); runSearch();});
+      const moreLeft=state.nearbyResults.length-state.nearbyShown;
+      els.nearbyMore.hidden=moreLeft<=0;
+      if(moreLeft>0) els.nearbyMore.textContent=`показать больше (${Math.min(10, moreLeft)})`;
+      if(els.nearbyCalc) els.nearbyCalc.hidden=true;
+    }
+    function getTextNodeAtPoint(x,y){
+      let range=null;
+      if(document.caretRangeFromPoint) range=document.caretRangeFromPoint(x,y);
+      else if(document.caretPositionFromPoint){ const pos=document.caretPositionFromPoint(x,y); if(pos){range=document.createRange(); range.setStart(pos.offsetNode,pos.offset); range.collapse(true);} }
+      if(!range || !range.startContainer || range.startContainer.nodeType!==Node.TEXT_NODE) return null;
+      return {node:range.startContainer, offset:range.startOffset};
+    }
+    function tokenAtPoint(ev){
+      const hit=getTextNodeAtPoint(ev.clientX,ev.clientY); if(!hit) return '';
+      const text=hit.node.nodeValue || ''; let i=Math.max(0, Math.min(hit.offset, text.length));
+      const isTok=ch=>/[\p{L}\p{N}_+.#-]/u.test(ch || '');
+      let a=i, b=i;
+      while(a>0 && isTok(text[a-1])) a--;
+      while(b<text.length && isTok(text[b])) b++;
+      return termKey(text.slice(a,b).replace(/^[.,;:!?()[\]{}<>«»“”'"`]+|[.,;:!?()[\]{}<>«»“”'"`]+$/g,''));
+    }
+    function searchPickedTerm(term){
+      term=termKey(term); if(!term) return;
+      els.searchInput.value=term;
+      els.searchScope.value='head';
+      els.searchMode.value='contains';
+      updateNearbyDebounced();
+      runSearch();
+    }
+    function handleResultDblClick(ev){
+      const direct=ev.target.closest('[data-search-term]');
+      if(direct && els.resultsBody.contains(direct)){ searchPickedTerm(direct.dataset.searchTerm); return; }
+      setTimeout(()=>{
+        const sel=window.getSelection && window.getSelection();
+        const selected=sel ? termKey(sel.toString()) : '';
+        if(selected && els.resultsBody.contains(sel.anchorNode?.parentElement || sel.anchorNode)){ searchPickedTerm(selected); return; }
+        const tok=tokenAtPoint(ev); if(tok) searchPickedTerm(tok);
+      },0);
+    }
+    function bindEvents(){
+      els.drawerToggle.onclick=()=>document.body.classList.add('drawerOpen'); els.drawerClose.onclick=()=>document.body.classList.remove('drawerOpen'); els.drawerOverlay.onclick=()=>document.body.classList.remove('drawerOpen');
+      els.southToggle.onchange=()=>{state.settings.showSouth=els.southToggle.checked; renderResults();};
+      els.nearbyToggle.onchange=()=>{state.settings.showNearby=els.nearbyToggle.checked; if(state.settings.showNearby) updateNearbyDebounced(); else renderNearby();};
+      els.gateZip.onchange=e=>handleZipFile(e.target.files[0]).catch(err=>{setStatus(err.message,'bad');alert(err.message);});
+      els.zipInput.onchange=e=>handleZipFile(e.target.files[0]).catch(err=>{setStatus(err.message,'bad');alert(err.message);});
+      els.clearBtn.onclick=clearAll; els.searchBtn.onclick=runSearch; els.searchInput.onkeydown=e=>{if(e.key==='Enter') runSearch();}; els.searchInput.oninput=()=>{state.nearbyShown=5; updateNearbyDebounced();};
+      els.searchScope.onchange=runSearch; els.searchMode.onchange=runSearch; els.pageSize.onchange=()=>{state.currentPage=1; renderResults();};
+      els.loadMoreBtn.onclick=async()=>{els.loadMoreBtn.disabled=true; await loadMoreResults(parseInt(els.pageSize.value,10)||300); els.loadMoreBtn.disabled=false; renderResults();};
+      els.autoLoadBtn.onclick=autoLoadAll; if(els.nearbyCalc) els.nearbyCalc.hidden=true; els.nearbyMore.onclick=(e)=>{e.preventDefault(); e.stopPropagation(); state.nearbyShown=Math.min(state.nearbyResults.length, state.nearbyShown+10); renderNearby();};
+      els.resultsBody.ondblclick=handleResultDblClick;
+    }
+    function init(){initEls(); bindEvents(); renderSlots(); renderDictTabs(); renderMarksUi(); rebuildColumnFilter(); renderResults(); setStatus('Ожидание ZIP-пакета.');}
+    document.addEventListener('DOMContentLoaded',init);
+  })();
+  </script>
+</body>
+</html>
